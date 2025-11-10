@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 from typing import Optional, Dict, Any
 from config.settings import Config
 from config.database import MySQLDatabase, SQLiteDatabase
@@ -13,7 +13,7 @@ class AttendanceLogger:
     def __init__(self, mysql_db: MySQLDatabase, sqlite_db: SQLiteDatabase):
         self.mysql_db = mysql_db
         self.sqlite_db = sqlite_db
-        self.last_scan_cache = {}  # Prevent duplicate scans
+        self.last_scan_cache: Dict[str, datetime] = {}  # Prevent duplicate scans
     
     def log_timein(self, worker_id: int) -> Dict[str, Any]:
         """
@@ -79,12 +79,15 @@ class AttendanceLogger:
             attendance_id = self.mysql_db.execute_query(query, (worker_id, today, time_in))
             
             if attendance_id:
-                # Log activity
-                self.mysql_db.execute_query("""
-                    INSERT INTO activity_logs 
-                    (user_id, action, table_name, record_id, description, ip_address)
-                    VALUES (%s, 'clock_in', 'attendance', %s, 'Facial recognition time-in', 'raspberry_pi')
-                """, (worker_id, attendance_id))
+                # Log activity (skip if fails)
+                try:
+                    self.mysql_db.execute_query("""
+                        INSERT INTO activity_logs 
+                        (action, table_name, record_id, description, ip_address)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, ('clock_in', 'attendance', attendance_id, 'Facial recognition time-in', 'raspberry_pi'))
+                except Exception as e:
+                    logger.warning(f"Activity log failed: {e}")
         else:
             # Buffer to SQLite
             attendance_id = self.sqlite_db.insert_attendance(
@@ -133,9 +136,18 @@ class AttendanceLogger:
                     'message': 'No time-in found for today'
                 }
             
-            # Calculate hours
-            time_in_dt = datetime.strptime(record['time_in'], '%H:%M:%S')
-            hours_worked = (now - time_in_dt).seconds / 3600
+            # Calculate hours - FIX: Handle both string and timedelta
+            time_in_value = record['time_in']
+            
+            if isinstance(time_in_value, str):
+                # It's a string, parse it
+                time_in_dt = datetime.strptime(time_in_value, '%H:%M:%S')
+                time_in_today = datetime.combine(date.today(), time_in_dt.time())
+            else:
+                # It's a timedelta, convert to datetime
+                time_in_today = datetime.combine(date.today(), (datetime.min + time_in_value).time())
+            
+            hours_worked = (now - time_in_today).seconds / 3600
             
             # Update time-out
             self.mysql_db.execute_query("""
@@ -144,15 +156,17 @@ class AttendanceLogger:
                 WHERE attendance_id = %s
             """, (time_out, hours_worked, record['attendance_id']))
             
-            # Log activity
-            self.mysql_db.execute_query("""
-                INSERT INTO activity_logs 
-                (user_id, action, table_name, record_id, description, ip_address)
-                VALUES (%s, 'clock_out', 'attendance', %s, 'Facial recognition time-out', 'raspberry_pi')
-            """, (worker_id, record['attendance_id']))
+            # Log activity (skip if fails)
+            try:
+                self.mysql_db.execute_query("""
+                    INSERT INTO activity_logs 
+                    (action, table_name, record_id, description, ip_address)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, ('clock_out', 'attendance', record['attendance_id'], 'Facial recognition time-out', 'raspberry_pi'))
+            except Exception as e:
+                logger.warning(f"Activity log failed: {e}")
         else:
             # Buffer to SQLite
-            # Calculate approximate hours (assumes buffered time-in exists)
             hours_worked = 8.0  # Default estimate
             success = self.sqlite_db.update_timeout(
                 worker_id, today, time_out, hours_worked

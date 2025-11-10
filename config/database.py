@@ -1,5 +1,3 @@
-# config/database.py
-
 import os
 import logging
 import mysql.connector
@@ -12,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class MySQLDatabase:
-    """Central MySQL database connection manager"""
+    """MySQL database connection manager"""
     
     def __init__(self) -> None:
         self.connection: Optional[mysql.connector.MySQLConnection] = None
@@ -30,7 +28,7 @@ class MySQLDatabase:
                 autocommit=True
             )
             self.is_connected = True
-            logger.info("MySQL connection established")
+            logger.info("MySQL connected")
             return True
         except MySQLError as e:
             logger.error(f"MySQL connection failed: {e}")
@@ -38,9 +36,9 @@ class MySQLDatabase:
             return False
     
     def execute_query(self, query: str, params: Optional[tuple] = None) -> Optional[int]:
-        """Execute INSERT/UPDATE/DELETE query"""
+        """Execute INSERT/UPDATE/DELETE"""
         if not self.is_connected or self.connection is None:
-            logger.warning("MySQL not connected, buffering to SQLite")
+            logger.warning("MySQL not connected")
             return None
         
         try:
@@ -50,12 +48,12 @@ class MySQLDatabase:
             cursor.close()
             return last_id
         except MySQLError as e:
-            logger.error(f"Query execution failed: {e}")
+            logger.error(f"Query failed: {e}")
             self.is_connected = False
             return None
     
     def fetch_all(self, query: str, params: Optional[tuple] = None) -> List[Dict[str, Any]]:
-        """Fetch multiple rows as dictionaries"""
+        """Fetch multiple rows"""
         if not self.is_connected:
             if not self.connect():
                 return []
@@ -74,36 +72,35 @@ class MySQLDatabase:
             return []
     
     def fetch_one(self, query: str, params: Optional[tuple] = None) -> Optional[Dict[str, Any]]:
-        """Fetch single row as dictionary"""
+        """Fetch single row"""
         results = self.fetch_all(query, params)
         return results[0] if results else None
     
     def close(self) -> None:
-        """Close MySQL connection"""
+        """Close connection"""
         if self.connection:
             self.connection.close()
             self.is_connected = False
-            logger.info("MySQL connection closed")
+            logger.info("MySQL closed")
 
 
 class SQLiteDatabase:
-    """Local SQLite database for offline buffering"""
+    """Local SQLite for offline buffering"""
     
     def __init__(self) -> None:
         self.db_path: str = Config.SQLITE_PATH
         self._init_database()
     
     def _init_database(self) -> None:
-        """Create SQLite tables if not exist"""
-        # Fix: Handle case where db_path has no directory
+        """Create tables"""
         db_dir = os.path.dirname(self.db_path)
-        if db_dir:  # Only create if there's a directory path
+        if db_dir:
             os.makedirs(db_dir, exist_ok=True)
         
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Offline attendance buffer
+        # Attendance buffer
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS attendance_buffer (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,7 +116,7 @@ class SQLiteDatabase:
             )
         """)
         
-        # Face encodings cache
+        # Face cache
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS face_encodings_cache (
                 encoding_id INTEGER PRIMARY KEY,
@@ -145,13 +142,13 @@ class SQLiteDatabase:
         
         conn.commit()
         conn.close()
-        logger.info("SQLite database initialized")
+        logger.info("SQLite initialized")
     
     def insert_attendance(self, worker_id: int, attendance_date: str, 
                          time_in: Optional[str] = None, 
                          time_out: Optional[str] = None,
                          status: str = 'present') -> int:
-        """Insert attendance record to buffer"""
+        """Insert attendance to buffer"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
@@ -170,7 +167,7 @@ class SQLiteDatabase:
     
     def update_timeout(self, worker_id: int, attendance_date: str, 
                       time_out: str, hours_worked: float) -> bool:
-        """Update time-out in buffer"""
+        """Update time-out"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
@@ -188,7 +185,7 @@ class SQLiteDatabase:
         return affected > 0
     
     def get_pending_records(self) -> List[Dict[str, Any]]:
-        """Get all records pending synchronization"""
+        """Get pending sync records"""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
@@ -205,7 +202,7 @@ class SQLiteDatabase:
         return records
     
     def mark_synced(self, buffer_id: int) -> None:
-        """Mark record as successfully synced"""
+        """Mark as synced"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
@@ -219,14 +216,12 @@ class SQLiteDatabase:
         conn.close()
     
     def cache_face_encodings(self, encodings: List[Dict[str, Any]]) -> None:
-        """Cache face encodings from MySQL"""
+        """Cache face encodings"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Clear old cache
         cursor.execute("DELETE FROM face_encodings_cache")
         
-        # Insert new encodings
         for enc in encodings:
             cursor.execute("""
                 INSERT INTO face_encodings_cache 
@@ -245,10 +240,10 @@ class SQLiteDatabase:
         
         conn.commit()
         conn.close()
-        logger.info(f"Cached {len(encodings)} face encodings")
+        logger.info(f"Cached {len(encodings)} encodings")
     
     def get_cached_encodings(self) -> List[Dict[str, Any]]:
-        """Get cached face encodings"""
+        """Get cached encodings"""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()

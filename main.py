@@ -3,7 +3,7 @@ import threading
 import time
 import sys
 from datetime import datetime
-from queue import Queue
+from typing import Optional, Dict, Any, Tuple
 from config.settings import Config
 from config.database import MySQLDatabase, SQLiteDatabase
 from models.face_recognizer import FaceRecognizer
@@ -26,44 +26,43 @@ logger = logging.getLogger(__name__)
 
 
 class AttendanceSystem:
-    """Main attendance system application - Optimized for 30 FPS"""
+    """Main attendance system - 30 FPS optimized"""
     
     def __init__(self):
         logger.info("Initializing TrackSite Attendance System...")
         
         # Database connections
-        self.mysql_db = None
-        self.sqlite_db = None
+        self.mysql_db: Optional[MySQLDatabase] = None
+        self.sqlite_db: Optional[SQLiteDatabase] = None
         
         # Core components
-        self.face_recognizer = None
-        self.attendance_logger = None
-        self.sync_manager = None
+        self.face_recognizer: Optional[FaceRecognizer] = None
+        self.attendance_logger: Optional[AttendanceLogger] = None
+        self.sync_manager: Optional[SyncManager] = None
         
         # Hardware interfaces
-        self.camera = None
-        self.gpio = None
-        self.display = None
+        self.camera: Optional[Camera] = None
+        self.gpio: Optional[GPIOHandler] = None
+        self.display: Optional[Display] = None
         
         # System state
         self.is_running = False
         self.timeout_mode = False
-        self.last_recognition_time = None
+        self.last_recognition_time: Optional[datetime] = None
         
         # Performance optimization
         self.target_fps = 30
         self.frame_time = 1.0 / self.target_fps
-        self.process_every_n_frames = 2  # Process recognition every 2 frames for speed
+        self.skip_frames = 3  # Process every 3rd frame for recognition
         self.frame_counter = 0
         
         # Threading
-        self.sync_thread = None
-        self.recognition_queue = Queue(maxsize=2)
-        self.recognition_thread = None
-        self.result_queue = Queue()
+        self.sync_thread: Optional[threading.Thread] = None
+        self.last_worker_info: Optional[Dict[str, Any]] = None
+        self.show_result_lock = threading.Lock()
     
     def initialize(self) -> bool:
-        """Initialize all system components with proper connection handling"""
+        """Initialize all system components"""
         logger.info("Initializing components...")
         
         try:
@@ -72,14 +71,12 @@ class AttendanceSystem:
             self.mysql_db = MySQLDatabase()
             self.sqlite_db = SQLiteDatabase()
             
-            # Try MySQL connection (can work offline with SQLite fallback)
             mysql_connected = self.mysql_db.connect()
             if mysql_connected:
                 logger.info("✓ MySQL connected")
             else:
-                logger.warning("⚠ MySQL unavailable - running in offline mode")
+                logger.warning("⚠ MySQL unavailable - offline mode")
             
-            # SQLite always available
             logger.info("✓ SQLite database ready")
             
             # Initialize core components
@@ -89,16 +86,15 @@ class AttendanceSystem:
             self.sync_manager = SyncManager(self.mysql_db, self.sqlite_db)
             logger.info("✓ Core components initialized")
             
-            # Initialize camera with optimization
+            # Initialize camera
             logger.info("Initializing camera...")
             self.camera = Camera()
             if not self.camera.initialize():
                 logger.error("❌ Camera initialization failed")
                 return False
             
-            # Set camera properties for performance
             self.camera.set_fps(30)
-            self.camera.set_resolution(640, 480)  # Lower resolution for speed
+            self.camera.set_resolution(640, 480)
             logger.info("✓ Camera initialized (640x480 @ 30fps)")
             
             # Setup GPIO
@@ -107,22 +103,22 @@ class AttendanceSystem:
             self.gpio.add_button_callback(self._handle_timeout_button)
             logger.info("✓ GPIO initialized")
             
-            # Create display window
+            # Create display window (FULLSCREEN)
             logger.info("Initializing display...")
             self.display = Display()
-            self.display.create_window(fullscreen=False)
-            logger.info("✓ Display initialized")
+            self.display.create_window(fullscreen=True)  # Changed to fullscreen
+            logger.info("✓ Display initialized (fullscreen)")
             
             # Load face encodings
             logger.info("Loading face encodings...")
             encoding_count = self.face_recognizer.load_encodings()
             if encoding_count == 0:
-                logger.warning("⚠ No face encodings loaded - system will not recognize faces")
+                logger.warning("⚠ No face encodings loaded")
             else:
                 logger.info(f"✓ Loaded {encoding_count} face encodings")
             
             logger.info("="*60)
-            logger.info("System initialization complete - Ready to run!")
+            logger.info("System ready!")
             logger.info("="*60)
             return True
             
@@ -131,85 +127,70 @@ class AttendanceSystem:
             return False
     
     def run(self):
-        """Main application loop - Optimized for 30 FPS"""
+        """Main loop - optimized for 30 FPS"""
         logger.info("Starting attendance system...")
         self.is_running = True
         
-        # Start background threads
+        # Start background sync
         self.sync_thread = threading.Thread(target=self._sync_worker, daemon=True)
         self.sync_thread.start()
         
-        self.recognition_thread = threading.Thread(target=self._recognition_worker, daemon=True)
-        self.recognition_thread.start()
-        
-        # Show startup message
-        self.display.show_message("TrackSite Attendance System", duration_ms=1500)
+        # Show startup message briefly
+        self.display.show_message("TrackSite Ready", duration_ms=1000)
         
         try:
             last_frame_time = time.time()
-            fps_counter = 0
-            fps_start_time = time.time()
+            fps_values = []
             current_fps = 0
             
             while self.is_running:
-                frame_start = time.time()
+                loop_start = time.time()
                 
                 # Read frame
                 ret, frame = self.camera.read_frame()
-                if not ret:
+                if not ret or frame is None:
                     logger.error("Failed to read camera frame")
                     time.sleep(0.1)
                     continue
                 
-                # Process frame (lightweight operations only in main loop)
                 self.frame_counter += 1
                 
-                # Queue frame for recognition processing (non-blocking)
-                if self.frame_counter % self.process_every_n_frames == 0:
-                    if self.recognition_queue.qsize() < 1:  # Don't flood the queue
-                        try:
-                            self.recognition_queue.put_nowait((frame.copy(), time.time()))
-                        except:
-                            pass  # Queue full, skip this frame
+                # Process recognition (every N frames for performance)
+                worker_info = None
+                if self.frame_counter % self.skip_frames == 0:
+                    worker_info, frame = self.face_recognizer.recognize_face(frame)
+                    
+                    if worker_info:
+                        self._handle_recognition(worker_info, frame)
                 
-                # Check for recognition results
-                annotated_frame = frame
-                try:
-                    while not self.result_queue.empty():
-                        result = self.result_queue.get_nowait()
-                        if result:
-                            worker_info, result_frame = result
-                            if worker_info:
-                                self._handle_recognition(worker_info, result_frame)
-                except:
-                    pass
-                
-                # Add status overlay (lightweight)
+                # Add status overlay
                 status = self._get_status_text(current_fps)
-                annotated_frame = self.display.add_status_bar(annotated_frame, status)
+                frame = self.display.add_status_bar(frame, status)
                 
                 # Add mode indicator
                 if self.timeout_mode:
-                    annotated_frame = self.display.add_overlay(
-                        annotated_frame,
-                        "TIME-OUT MODE",
+                    frame = self.display.add_overlay(
+                        frame,
+                        "⏱ TIME-OUT MODE",
                         position=(50, 50),
-                        color=(0, 165, 255)
+                        color=(0, 165, 255),
+                        font_scale=1.5
                     )
                 
                 # Display frame
-                self.display.show_frame(annotated_frame)
+                self.display.show_frame(frame)
                 
-                # Calculate FPS
-                fps_counter += 1
-                if time.time() - fps_start_time >= 1.0:
-                    current_fps = fps_counter
-                    fps_counter = 0
-                    fps_start_time = time.time()
+                # FPS calculation
+                fps_values.append(1.0 / (time.time() - last_frame_time))
+                last_frame_time = time.time()
                 
-                # Handle keyboard input
+                if len(fps_values) >= 10:
+                    current_fps = int(sum(fps_values) / len(fps_values))
+                    fps_values = []
+                
+                # Handle keyboard
                 key = self.display.wait_key(1)
-                if key == ord('q'):
+                if key == ord('q') or key == 27:  # q or ESC
                     logger.info("Quit key pressed")
                     break
                 elif key == ord('t'):
@@ -217,8 +198,8 @@ class AttendanceSystem:
                 elif key == ord('r'):
                     self._reload_encodings()
                 
-                # Frame rate limiting
-                elapsed = time.time() - frame_start
+                # Frame limiting for consistent FPS
+                elapsed = time.time() - loop_start
                 if elapsed < self.frame_time:
                     time.sleep(self.frame_time - elapsed)
         
@@ -231,36 +212,13 @@ class AttendanceSystem:
         finally:
             self.shutdown()
     
-    def _recognition_worker(self):
-        """Background thread for CPU-intensive face recognition"""
-        logger.info("Recognition worker started")
-        
-        while self.is_running:
-            try:
-                # Get frame from queue (blocking with timeout)
-                frame, timestamp = self.recognition_queue.get(timeout=0.1)
-                
-                # Perform recognition (CPU-intensive operation)
-                worker_info, annotated_frame = self.face_recognizer.recognize_face(frame)
-                
-                # Put result in result queue
-                if worker_info:
-                    try:
-                        self.result_queue.put_nowait((worker_info, annotated_frame))
-                    except:
-                        pass  # Queue full, skip
-                
-            except:
-                continue  # Queue empty or timeout
-        
-        logger.info("Recognition worker stopped")
-    
-    def _handle_recognition(self, worker_info: dict, frame):
-        """Handle recognized worker - optimized to prevent lag"""
-        # Prevent rapid re-processing
+    def _handle_recognition(self, worker_info: Dict[str, Any], frame):
+        """Handle recognized worker"""
         now = datetime.now()
+        
+        # Prevent rapid re-processing
         if self.last_recognition_time:
-            if (now - self.last_recognition_time).seconds < 2:
+            if (now - self.last_recognition_time).total_seconds() < 3:
                 return
         
         self.last_recognition_time = now
@@ -270,37 +228,40 @@ class AttendanceSystem:
         
         logger.info(f"Recognized: {worker_name} (ID: {worker_id})")
         
-        # Time-in or time-out (run in background to avoid blocking)
+        # Process in background to avoid lag
         threading.Thread(
             target=self._process_attendance,
-            args=(worker_info, frame),
+            args=(worker_info, frame.copy()),
             daemon=True
         ).start()
     
-    def _process_attendance(self, worker_info: dict, frame):
-        """Process attendance in background thread"""
+    def _process_attendance(self, worker_info: Dict[str, Any], frame):
+        """Process attendance (runs in background)"""
         worker_id = worker_info['worker_id']
         worker_name = f"{worker_info['first_name']} {worker_info['last_name']}"
         
-        if self.timeout_mode:
-            result = self.attendance_logger.log_timeout(worker_id)
-            self._show_result(result, worker_name, frame)
-            
-            # Auto-disable timeout mode
-            if result['success']:
-                self.timeout_mode = False
-                self.gpio.set_led(False)
-        else:
-            result = self.attendance_logger.log_timein(worker_id)
-            
-            # Handle already-in scenario
-            if result.get('action') == 'already_in':
-                self._prompt_timeout(worker_info, frame)
-            else:
+        with self.show_result_lock:
+            if self.timeout_mode:
+                # Time-out mode
+                result = self.attendance_logger.log_timeout(worker_id)
                 self._show_result(result, worker_name, frame)
+                
+                if result['success']:
+                    self.timeout_mode = False
+                    self.gpio.set_led(False)
+            else:
+                # Time-in mode
+                result = self.attendance_logger.log_timein(worker_id)
+                
+                if result.get('action') == 'already_in':
+                    # Auto time-out
+                    timeout_result = self.attendance_logger.log_timeout(worker_id)
+                    self._show_result(timeout_result, worker_name, frame)
+                else:
+                    self._show_result(result, worker_name, frame)
     
-    def _show_result(self, result: dict, worker_name: str, frame):
-        """Display attendance result with timestamp"""
+    def _show_result(self, result: Dict[str, Any], worker_name: str, frame):
+        """Display result with better formatting"""
         current_time = datetime.now()
         
         if result['success']:
@@ -309,170 +270,119 @@ class AttendanceSystem:
             if action == 'timein':
                 message = f"✅ TIME-IN: {worker_name}"
                 time_str = result.get('time_in', current_time.strftime('%I:%M:%S %p'))
-                time_info = f"⏰ Time: {time_str}"
-                color = (0, 255, 0)  # Green
+                time_info = f"⏰ {time_str}"
+                color = (0, 255, 0)
             
             elif action == 'timeout':
                 message = f"🏁 TIME-OUT: {worker_name}"
                 hours = result.get('hours_worked', '0.00')
-                time_str = current_time.strftime('%I:%M:%S %p')
-                time_info = f"⏱️ Hours Worked: {hours} | Time: {time_str}"
-                color = (0, 165, 255)  # Orange
+                time_info = f"⏱ Hours: {hours} hrs"
+                color = (0, 165, 255)
             
             else:
                 message = result.get('message', 'Success')
                 time_info = f"🕐 {current_time.strftime('%I:%M:%S %p')}"
                 color = (0, 255, 0)
             
-            # Display success message
+            # Create display frame
             display_frame = frame.copy()
             display_frame = self.display.add_overlay(
                 display_frame, message,
-                position=(50, 100), color=color, font_scale=1.5
+                position=(50, 200), color=color, font_scale=2.0
             )
             
-            if time_info:
-                display_frame = self.display.add_overlay(
-                    display_frame, time_info,
-                    position=(50, 150), color=(255, 255, 255), font_scale=1.0
-                )
+            display_frame = self.display.add_overlay(
+                display_frame, time_info,
+                position=(50, 280), color=(255, 255, 255), font_scale=1.5
+            )
             
-            # Add date
             date_str = f"📅 {current_time.strftime('%B %d, %Y')}"
             display_frame = self.display.add_overlay(
                 display_frame, date_str,
-                position=(50, 200), color=(200, 200, 200), font_scale=0.8
+                position=(50, 350), color=(200, 200, 200), font_scale=1.0
             )
             
             self.display.show_frame(display_frame)
-            time.sleep(Config.DISPLAY_FEEDBACK_SECONDS)
+            time.sleep(3)
         
         else:
-            # Display error
+            # Error
             message = result.get('message', 'Error')
             logger.warning(f"Attendance error: {message}")
             
             display_frame = frame.copy()
             display_frame = self.display.add_overlay(
                 display_frame, f"❌ {message}",
-                position=(50, 100), color=(0, 0, 255), font_scale=1.2
+                position=(50, 200), color=(0, 0, 255), font_scale=1.5
             )
             
-            # Add timestamp to error
             time_str = f"🕐 {current_time.strftime('%I:%M:%S %p')}"
             display_frame = self.display.add_overlay(
                 display_frame, time_str,
-                position=(50, 150), color=(255, 255, 255), font_scale=0.8
+                position=(50, 280), color=(255, 255, 255), font_scale=1.0
             )
             
             self.display.show_frame(display_frame)
             time.sleep(2)
-    
-    def _prompt_timeout(self, worker_info: dict, frame):
-        """Prompt for time-out confirmation"""
-        worker_name = f"{worker_info['first_name']} {worker_info['last_name']}"
-        
-        logger.info(f"Prompting time-out for {worker_name}")
-        
-        # Display prompt
-        prompt_frame = frame.copy()
-        prompt_frame = self.display.add_overlay(
-            prompt_frame,
-            f"{worker_name} - Already Timed In",
-            position=(50, 100), color=(255, 255, 0), font_scale=1.2
-        )
-        prompt_frame = self.display.add_overlay(
-            prompt_frame,
-            "Press ENTER for Time-Out or ESC to Cancel",
-            position=(50, 150), color=(255, 255, 255), font_scale=0.8
-        )
-        
-        self.display.show_frame(prompt_frame)
-        
-        # Wait for confirmation
-        start_time = time.time()
-        while time.time() - start_time < Config.TIMEOUT_CONFIRMATION_SECONDS:
-            key = self.display.wait_key(100)
-            
-            if key == 13:  # ENTER key
-                result = self.attendance_logger.log_timeout(worker_info['worker_id'])
-                self._show_result(result, worker_name, frame)
-                return
-            
-            elif key == 27:  # ESC key
-                logger.info("Time-out cancelled")
-                return
-        
-        logger.info("Time-out prompt timed out")
     
     def _toggle_timeout_mode(self):
         """Toggle time-out mode"""
         self.timeout_mode = not self.timeout_mode
         self.gpio.set_led(self.timeout_mode)
         
-        mode_text = "TIME-OUT MODE ENABLED" if self.timeout_mode else "TIME-IN MODE"
+        mode_text = "⏱ TIME-OUT MODE" if self.timeout_mode else "✅ TIME-IN MODE"
         logger.info(mode_text)
         
         self.display.show_message(mode_text, duration_ms=1500)
     
     def _handle_timeout_button(self):
-        """Callback for GPIO timeout button"""
+        """GPIO button callback"""
         logger.info("Timeout button pressed")
         self._toggle_timeout_mode()
     
     def _reload_encodings(self):
-        """Reload face encodings from database"""
+        """Reload face encodings"""
         logger.info("Reloading face encodings...")
         count = self.face_recognizer.load_encodings()
         self.display.show_message(f"Loaded {count} faces", duration_ms=2000)
     
     def _get_status_text(self, fps: int = 0) -> str:
-        """Get system status text with time"""
-        status_parts = []
+        """Get status text"""
+        parts = []
         
-        # Connection status
         if self.mysql_db and self.mysql_db.is_connected:
-            status_parts.append("🟢 ONLINE")
+            parts.append("🟢 ONLINE")
         else:
-            status_parts.append("🔴 OFFLINE")
+            parts.append("🔴 OFFLINE")
         
-        # Mode
         if self.timeout_mode:
-            status_parts.append("⏰ TIME-OUT")
+            parts.append("⏰ TIME-OUT")
         else:
-            status_parts.append("✅ TIME-IN")
+            parts.append("✅ TIME-IN")
         
-        # FPS
-        status_parts.append(f"📹 {fps} FPS")
+        parts.append(f"📹 {fps} FPS")
         
-        # Current time
         now = datetime.now()
-        status_parts.append(f"🕐 {now.strftime('%I:%M:%S %p')}")
+        parts.append(f"🕐 {now.strftime('%I:%M:%S %p')}")
+        parts.append(f"📅 {now.strftime('%b %d, %Y')}")
         
-        # Date
-        status_parts.append(f"📅 {now.strftime('%b %d, %Y')}")
-        
-        return " | ".join(status_parts)
+        return " | ".join(parts)
     
     def _sync_worker(self):
-        """Background thread for database synchronization"""
+        """Background sync worker"""
         logger.info("Sync worker started")
         
         while self.is_running:
             time.sleep(Config.SYNC_INTERVAL_SECONDS)
             
             try:
-                # Reconnect to MySQL if disconnected
                 if self.mysql_db and not self.mysql_db.is_connected:
                     if self.mysql_db.connect():
                         logger.info("MySQL reconnected")
-                        # Reload encodings after reconnection
                         self.face_recognizer.load_encodings()
                 
-                # Sync buffered records
                 if self.sync_manager:
                     result = self.sync_manager.sync_all()
-                    
                     if result['synced'] > 0:
                         logger.info(f"Synced {result['synced']} records")
             
@@ -482,19 +392,14 @@ class AttendanceSystem:
         logger.info("Sync worker stopped")
     
     def shutdown(self):
-        """Clean shutdown of all components"""
-        logger.info("Shutting down system...")
+        """Clean shutdown"""
+        logger.info("Shutting down...")
         
         self.is_running = False
         
-        # Wait for threads
-        if self.sync_thread and self.sync_thread.is_alive():
+        if self.sync_thread:
             self.sync_thread.join(timeout=3)
         
-        if self.recognition_thread and self.recognition_thread.is_alive():
-            self.recognition_thread.join(timeout=3)
-        
-        # Cleanup resources
         if self.camera:
             self.camera.release()
         
@@ -513,52 +418,41 @@ class AttendanceSystem:
 def main():
     """Main entry point"""
     print("\n" + "="*70)
-    print("  🎯 TrackSite Attendance System - Face Recognition")
+    print("  🎯 TrackSite Attendance System")
     print("="*70 + "\n")
     
     try:
-        # Create system instance
         logger.info("Creating system instance...")
-        print("📦 Creating system instance...")
         system = AttendanceSystem()
         
-        # Initialize components
-        logger.info("Initializing system components...")
-        print("🔧 Initializing system components...")
+        logger.info("Initializing...")
         if not system.initialize():
-            logger.error("System initialization failed!")
-            print("\n❌ System initialization failed. Check logs for details.")
+            logger.error("Initialization failed!")
+            print("\n❌ Failed. Check logs.")
             return 1
         
-        logger.info("System initialized successfully!")
-        print("\n✅ System initialized successfully!")
+        logger.info("System ready!")
+        print("\n✅ System ready!")
         print("\n" + "="*70)
         print("  📋 CONTROLS")
         print("="*70)
-        print("  • Press 'q' to quit")
+        print("  • Press 'q' or ESC to quit")
         print("  • Press 't' to toggle Time-Out mode")
-        print("  • Press 'r' to reload face encodings")
-        print("="*70)
-        print("\n🎥 Starting camera feed...")
-        print(f"⏰ System started at: {datetime.now().strftime('%I:%M:%S %p on %B %d, %Y')}\n")
+        print("  • Press 'r' to reload encodings")
+        print("="*70 + "\n")
         
-        # Run the main loop
         system.run()
         
-        print("\n✅ System shutdown complete.")
-        print(f"⏰ Shutdown at: {datetime.now().strftime('%I:%M:%S %p')}\n")
+        print("\n✅ Shutdown complete.\n")
         return 0
     
     except KeyboardInterrupt:
-        print("\n\n⚠️  Interrupted by user")
-        print(f"⏰ Stopped at: {datetime.now().strftime('%I:%M:%S %p')}\n")
+        print("\n\n⚠ Interrupted\n")
         return 0
     
     except Exception as e:
         logger.exception(f"Fatal error: {e}")
-        print(f"\n❌ Fatal error: {e}")
-        print("📄 Check logs/system.log for details.")
-        print(f"⏰ Error occurred at: {datetime.now().strftime('%I:%M:%S %p')}\n")
+        print(f"\n❌ Fatal error: {e}\n")
         return 1
 
 
