@@ -1,0 +1,407 @@
+2025-11-10 17:56:13,457 - __main__ - INFO - Creating system instance...
+2025-11-10 17:56:13,458 - main - INFO - Initializing TrackSite Attendance System...
+2025-11-10 17:56:13,459 - config.database - INFO - SQLite database initialized
+2025-11-10 17:56:13,550 - config.database - INFO - MySQL connection established
+2025-11-10 17:56:13,550 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 17:56:13,665 - config.database - INFO - Cached 1 face encodings
+2025-11-10 17:56:13,665 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 17:56:13,666 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-10 17:56:13,666 - __main__ - INFO - Initializing system components...
+2025-11-10 17:56:13,667 - main - INFO - Initializing components...
+2025-11-10 17:56:26,410 - utils.camera - INFO - Camera initialized successfully
+2025-11-10 17:56:26,427 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 17:56:26,522 - config.database - INFO - Cached 1 face encodings
+2025-11-10 17:56:26,523 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 17:56:26,523 - main - INFO - System initialization complete
+2025-11-10 17:56:26,523 - __main__ - INFO - System initialized successfully!
+2025-11-10 17:56:26,525 - main - INFO - Starting attendance system...
+2025-11-10 17:56:26,525 - main - INFO - Sync worker started
+2025-11-10 17:56:31,415 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:31,541 - config.database - ERROR - Query execution failed: 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`construction_management`.`activity_logs`, CONSTRAINT `activity_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL)
+2025-11-10 17:56:35,444 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:35,445 - main - WARNING - Attendance error: Already scanned recently
+2025-11-10 17:56:38,267 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:38,267 - main - WARNING - Attendance error: Already scanned recently
+2025-11-10 17:56:41,234 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:41,235 - main - WARNING - Attendance error: Already scanned recently
+2025-11-10 17:56:44,214 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:44,214 - main - WARNING - Attendance error: Already scanned recently
+2025-11-10 17:56:47,081 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:47,082 - main - WARNING - Attendance error: Already scanned recently
+2025-11-10 17:56:49,936 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:49,936 - main - WARNING - Attendance error: Already scanned recently
+2025-11-10 17:56:52,909 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:56:52,910 - main - WARNING - Attendance error: Already scanned recently
+2025-11-10 17:56:54,913 - main - INFO - Quit key pressed
+2025-11-10 17:56:54,913 - main - INFO - Shutting down system...
+2025-11-10 17:57:00,213 - utils.camera - INFO - Camera released
+2025-11-10 17:57:00,235 - config.database - INFO - MySQL connection closed
+2025-11-10 17:57:00,242 - main - INFO - Shutdown complete
+2025-11-10 17:59:42,962 - __main__ - INFO - Creating system instance...
+2025-11-10 17:59:42,963 - main - INFO - Initializing TrackSite Attendance System...
+2025-11-10 17:59:42,965 - config.database - INFO - SQLite database initialized
+2025-11-10 17:59:43,069 - config.database - INFO - MySQL connection established
+2025-11-10 17:59:43,070 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 17:59:43,152 - config.database - INFO - Cached 1 face encodings
+2025-11-10 17:59:43,153 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 17:59:43,154 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-10 17:59:43,155 - __main__ - INFO - Initializing system components...
+2025-11-10 17:59:43,155 - main - INFO - Initializing components...
+2025-11-10 17:59:55,879 - utils.camera - INFO - Camera initialized successfully
+2025-11-10 17:59:55,920 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 17:59:56,043 - config.database - INFO - Cached 1 face encodings
+2025-11-10 17:59:56,044 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 17:59:56,044 - main - INFO - System initialization complete
+2025-11-10 17:59:56,044 - __main__ - INFO - System initialized successfully!
+2025-11-10 17:59:56,046 - main - INFO - Starting attendance system...
+2025-11-10 17:59:56,047 - main - INFO - Sync worker started
+2025-11-10 17:59:59,169 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 17:59:59,171 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:04,236 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:05,133 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:05,135 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:10,161 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:10,961 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:10,962 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:15,990 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:16,668 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:16,671 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:21,720 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:22,432 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:22,434 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:25,552 - main - INFO - Time-out cancelled
+2025-11-10 18:00:26,273 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:26,274 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:26,957 - main - INFO - Time-out cancelled
+2025-11-10 18:00:28,448 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:28,449 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:33,531 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:34,402 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:34,404 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:39,460 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:40,127 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:40,129 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:45,182 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:45,890 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:45,891 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:50,981 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:51,749 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:51,750 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:00:56,812 - main - INFO - Time-out prompt timed out
+2025-11-10 18:00:57,439 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:00:57,440 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:02,473 - main - INFO - Time-out prompt timed out
+2025-11-10 18:01:03,111 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:01:03,113 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:08,187 - main - INFO - Time-out prompt timed out
+2025-11-10 18:01:08,712 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:01:08,713 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:13,794 - main - INFO - Time-out prompt timed out
+2025-11-10 18:01:14,416 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:01:14,417 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:19,473 - main - INFO - Time-out prompt timed out
+2025-11-10 18:01:20,274 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:01:20,276 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:25,313 - main - INFO - Time-out prompt timed out
+2025-11-10 18:01:26,171 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:01:26,172 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:26,176 - main - INFO - Time-out cancelled
+2025-11-10 18:01:28,213 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:01:28,214 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:28,957 - main - INFO - Time-out cancelled
+2025-11-10 18:01:30,500 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:01:30,502 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:01:30,585 - main - INFO - Shutting down system...
+2025-11-10 18:01:35,879 - utils.camera - INFO - Camera released
+2025-11-10 18:01:35,887 - config.database - INFO - MySQL connection closed
+2025-11-10 18:01:35,890 - main - INFO - Shutdown complete
+2025-11-10 18:01:35,891 - __main__ - ERROR - Fatal error: strptime() argument 1 must be str, not datetime.timedelta
+Traceback (most recent call last):
+  File "d:\facial_recognition_system\run.py", line 42, in main
+    self.camera.cap.set(cv2.CAP_PROP_FPS, 30)
+    ^^^^^^^^
+  File "d:\facial_recognition_system\main.py", line 98, in run
+    frame = self._process_frame(frame)
+  File "d:\facial_recognition_system\main.py", line 139, in _process_frame
+    self._handle_recognition(worker_info, annotated_frame)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\facial_recognition_system\main.py", line 172, in _handle_recognition
+    self._prompt_timeout(worker_info, frame)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "d:\facial_recognition_system\main.py", line 253, in _prompt_timeout
+    result = self.attendance_logger.log_timeout(worker_info['worker_id'])
+  File "d:\facial_recognition_system\models\attendance_logger.py", line 137, in log_timeout
+    time_in_dt = datetime.strptime(record['time_in'], '%H:%M:%S')
+TypeError: strptime() argument 1 must be str, not datetime.timedelta
+2025-11-10 18:03:51,531 - __main__ - INFO - Creating system instance...
+2025-11-10 18:03:51,531 - main - INFO - Initializing TrackSite Attendance System...
+2025-11-10 18:03:51,532 - config.database - INFO - SQLite database initialized
+2025-11-10 18:03:51,628 - config.database - INFO - MySQL connection established
+2025-11-10 18:03:51,629 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 18:03:51,722 - config.database - INFO - Cached 1 face encodings
+2025-11-10 18:03:51,722 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 18:03:51,723 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-10 18:03:51,723 - __main__ - INFO - Initializing system components...
+2025-11-10 18:03:51,723 - main - INFO - Initializing components...
+2025-11-10 18:04:05,468 - utils.camera - INFO - Camera initialized successfully
+2025-11-10 18:04:05,491 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 18:04:05,587 - config.database - INFO - Cached 1 face encodings
+2025-11-10 18:04:05,588 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 18:04:05,589 - main - INFO - System initialization complete
+2025-11-10 18:04:05,589 - __main__ - INFO - System initialized successfully!
+2025-11-10 18:04:05,591 - main - INFO - Starting attendance system...
+2025-11-10 18:04:05,591 - main - INFO - Sync worker started
+2025-11-10 18:04:09,256 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:04:09,259 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:04:14,290 - main - INFO - Time-out prompt timed out
+2025-11-10 18:04:15,510 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:04:15,512 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:04:16,731 - main - INFO - Shutting down system...
+2025-11-10 18:04:22,024 - utils.camera - INFO - Camera released
+2025-11-10 18:04:22,048 - config.database - INFO - MySQL connection closed
+2025-11-10 18:04:22,049 - main - INFO - Shutdown complete
+2025-11-10 18:04:22,050 - __main__ - ERROR - Fatal error: strptime() argument 1 must be str, not datetime.timedelta
+Traceback (most recent call last):
+  File "d:\facial_recognition_system\run.py", line 42, in main
+    system.run()
+    ~~~~~~~~~~^^
+  File "d:\facial_recognition_system\main.py", line 98, in run
+    frame = self._process_frame(frame)
+  File "d:\facial_recognition_system\main.py", line 139, in _process_frame
+    self._handle_recognition(worker_info, annotated_frame)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\facial_recognition_system\main.py", line 172, in _handle_recognition
+    self._prompt_timeout(worker_info, frame)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "d:\facial_recognition_system\main.py", line 253, in _prompt_timeout
+    result = self.attendance_logger.log_timeout(worker_info['worker_id'])
+  File "d:\facial_recognition_system\models\attendance_logger.py", line 137, in log_timeout
+    time_in_dt = datetime.strptime(record['time_in'], '%H:%M:%S')
+TypeError: strptime() argument 1 must be str, not datetime.timedelta
+2025-11-10 18:04:28,749 - __main__ - INFO - Creating system instance...
+2025-11-10 18:04:28,749 - main - INFO - Initializing TrackSite Attendance System...
+2025-11-10 18:04:28,751 - config.database - INFO - SQLite database initialized
+2025-11-10 18:04:28,785 - config.database - INFO - MySQL connection established
+2025-11-10 18:04:28,785 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 18:04:28,894 - config.database - INFO - Cached 1 face encodings
+2025-11-10 18:04:28,895 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 18:04:28,895 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-10 18:04:28,896 - __main__ - INFO - Initializing system components...
+2025-11-10 18:04:28,896 - main - INFO - Initializing components...
+2025-11-10 18:04:41,942 - utils.camera - INFO - Camera initialized successfully
+2025-11-10 18:04:41,963 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 18:04:42,077 - config.database - INFO - Cached 1 face encodings
+2025-11-10 18:04:42,078 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 18:04:42,079 - main - INFO - System initialization complete
+2025-11-10 18:04:42,079 - __main__ - INFO - System initialized successfully!
+2025-11-10 18:04:42,081 - main - INFO - Starting attendance system...
+2025-11-10 18:04:42,081 - main - INFO - Sync worker started
+2025-11-10 18:04:45,656 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:04:45,657 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:04:50,705 - main - INFO - Time-out prompt timed out
+2025-11-10 18:04:51,910 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:04:51,911 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:04:56,964 - main - INFO - Time-out prompt timed out
+2025-11-10 18:04:58,192 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:04:58,194 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:03,226 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:04,252 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:04,253 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:09,288 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:10,483 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:10,485 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:15,525 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:16,764 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:16,766 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:21,807 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:22,796 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:22,798 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:27,846 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:29,062 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:29,064 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:34,106 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:35,143 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:35,145 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:40,195 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:41,291 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:41,293 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:46,335 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:47,313 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:47,314 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:52,413 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:53,308 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:53,310 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:05:58,365 - main - INFO - Time-out prompt timed out
+2025-11-10 18:05:59,350 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:05:59,351 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:06:04,396 - main - INFO - Time-out prompt timed out
+2025-11-10 18:06:05,435 - main - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:06:05,436 - main - INFO - Prompting time-out for Test Worker
+2025-11-10 18:06:06,159 - main - INFO - Shutting down system...
+2025-11-10 18:06:11,447 - utils.camera - INFO - Camera released
+2025-11-10 18:06:11,456 - config.database - INFO - MySQL connection closed
+2025-11-10 18:06:11,468 - main - INFO - Shutdown complete
+2025-11-10 18:06:11,468 - __main__ - ERROR - Fatal error: strptime() argument 1 must be str, not datetime.timedelta
+Traceback (most recent call last):
+  File "d:\facial_recognition_system\run.py", line 42, in main
+    system.run()
+    ~~~~~~~~~~^^
+  File "d:\facial_recognition_system\main.py", line 98, in run
+    frame = self._process_frame(frame)
+  File "d:\facial_recognition_system\main.py", line 139, in _process_frame
+    self._handle_recognition(worker_info, annotated_frame)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\facial_recognition_system\main.py", line 172, in _handle_recognition
+    self._prompt_timeout(worker_info, frame)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "d:\facial_recognition_system\main.py", line 253, in _prompt_timeout
+    result = self.attendance_logger.log_timeout(worker_info['worker_id'])
+  File "d:\facial_recognition_system\models\attendance_logger.py", line 137, in log_timeout
+    time_in_dt = datetime.strptime(record['time_in'], '%H:%M:%S')
+TypeError: strptime() argument 1 must be str, not datetime.timedelta
+2025-11-10 18:15:27,526 - __main__ - INFO - Creating system instance...
+2025-11-10 18:15:27,526 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-10 18:15:27,527 - __main__ - INFO - Initializing system components...
+2025-11-10 18:15:27,527 - __main__ - INFO - Initializing components...
+2025-11-10 18:15:27,527 - __main__ - INFO - Connecting to databases...
+2025-11-10 18:15:27,529 - config.database - INFO - SQLite database initialized
+2025-11-10 18:15:27,620 - config.database - INFO - MySQL connection established
+2025-11-10 18:15:27,663 - __main__ - INFO - Initializing core components...
+2025-11-10 18:15:27,666 - __main__ - INFO - Initializing camera...
+2025-11-10 18:15:40,463 - utils.camera - INFO - Camera initialized successfully
+2025-11-10 18:15:40,463 - __main__ - ERROR - Initialization error: 'Camera' object has no attribute 'set_fps'
+Traceback (most recent call last):
+  File "d:\facial_recognition_system\main.py", line 100, in initialize
+    self.camera.set_fps(30)
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Camera' object has no attribute 'set_fps'
+2025-11-10 18:15:40,465 - __main__ - ERROR - System initialization failed!
+2025-11-10 18:17:00,404 - __main__ - INFO - Creating system instance...
+2025-11-10 18:17:00,405 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-10 18:17:00,405 - __main__ - INFO - Initializing system components...
+2025-11-10 18:17:00,405 - __main__ - INFO - Initializing components...
+2025-11-10 18:17:00,405 - __main__ - INFO - Connecting to databases...
+2025-11-10 18:17:00,407 - config.database - INFO - SQLite database initialized
+2025-11-10 18:17:00,495 - config.database - INFO - MySQL connection established
+2025-11-10 18:17:00,503 - __main__ - INFO - Initializing core components...
+2025-11-10 18:17:00,503 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 18:17:00,584 - config.database - INFO - Cached 1 face encodings
+2025-11-10 18:17:00,585 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 18:17:00,588 - __main__ - INFO - Initializing camera...
+2025-11-10 18:17:00,589 - utils.camera - INFO - Opening camera 0...
+2025-11-10 18:17:13,913 - utils.camera - INFO - Camera initialized successfully
+2025-11-10 18:17:13,913 - utils.camera - INFO - Resolution: 640x480
+2025-11-10 18:17:13,914 - utils.camera - INFO - FPS: 30
+2025-11-10 18:17:13,944 - utils.camera - INFO - FPS set to 30
+2025-11-10 18:17:13,955 - utils.camera - INFO - Resolution set to 640x480
+2025-11-10 18:17:13,959 - __main__ - INFO - Initializing GPIO...
+2025-11-10 18:17:13,959 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-10 18:17:13,963 - __main__ - INFO - Initializing display...
+2025-11-10 18:17:14,019 - __main__ - INFO - Loading face encodings...
+2025-11-10 18:17:14,020 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 18:17:14,141 - config.database - INFO - Cached 1 face encodings
+2025-11-10 18:17:14,142 - models.face_recognizer - INFO - Loaded 1 face encodings
+2025-11-10 18:17:14,148 - __main__ - INFO - ============================================================
+2025-11-10 18:17:14,151 - __main__ - INFO - System initialization complete - Ready to run!
+2025-11-10 18:17:14,151 - __main__ - INFO - ============================================================
+2025-11-10 18:17:14,152 - __main__ - INFO - System initialized successfully!
+2025-11-10 18:17:14,155 - __main__ - INFO - Starting attendance system...
+2025-11-10 18:17:14,156 - __main__ - INFO - Sync worker started
+2025-11-10 18:17:14,158 - __main__ - INFO - Recognition worker started
+2025-11-10 18:17:16,639 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:17:16,641 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:17:20,020 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:17:20,023 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:17:22,559 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:17:22,802 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:17:22,804 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:17:25,845 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:17:26,076 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:17:26,079 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:17:28,783 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:17:29,023 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:17:29,026 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:17:31,495 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:17:31,712 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:17:31,715 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:17:33,971 - __main__ - INFO - Quit key pressed
+2025-11-10 18:17:33,971 - __main__ - INFO - Shutting down system...
+2025-11-10 18:17:34,085 - __main__ - INFO - Recognition worker stopped
+2025-11-10 18:17:34,302 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:17:36,926 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:17:36,972 - utils.camera - INFO - Releasing camera...
+2025-11-10 18:17:37,297 - utils.camera - INFO - Camera released
+2025-11-10 18:17:37,312 - utils.display - INFO - Display window destroyed
+2025-11-10 18:17:37,314 - config.database - INFO - MySQL connection closed
+2025-11-10 18:17:37,315 - __main__ - INFO - Shutdown complete
+2025-11-10 18:18:54,581 - __main__ - INFO - Creating system instance...
+2025-11-10 18:18:54,582 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-10 18:18:54,582 - __main__ - INFO - Initializing system components...
+2025-11-10 18:18:54,583 - __main__ - INFO - Initializing components...
+2025-11-10 18:18:54,583 - __main__ - INFO - Connecting to databases...
+2025-11-10 18:18:54,585 - config.database - INFO - SQLite database initialized
+2025-11-10 18:18:54,674 - config.database - INFO - MySQL connection established
+2025-11-10 18:18:54,683 - __main__ - INFO - Initializing core components...
+2025-11-10 18:18:54,686 - __main__ - INFO - Initializing camera...
+2025-11-10 18:18:54,686 - utils.camera - INFO - Opening camera 0...
+2025-11-10 18:19:07,910 - utils.camera - INFO - Camera initialized successfully
+2025-11-10 18:19:07,911 - utils.camera - INFO - Resolution: 640x480
+2025-11-10 18:19:07,911 - utils.camera - INFO - FPS: 30
+2025-11-10 18:19:07,916 - utils.camera - INFO - FPS set to 30
+2025-11-10 18:19:07,927 - utils.camera - INFO - Resolution set to 640x480
+2025-11-10 18:19:07,931 - __main__ - INFO - Initializing GPIO...
+2025-11-10 18:19:07,931 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-10 18:19:07,935 - __main__ - INFO - Initializing display...
+2025-11-10 18:19:07,990 - __main__ - INFO - Loading face encodings...
+2025-11-10 18:19:07,990 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-10 18:19:08,101 - config.database - INFO - Cached 1 face encodings
+2025-11-10 18:19:08,112 - __main__ - INFO - ============================================================
+2025-11-10 18:19:08,113 - __main__ - INFO - System initialization complete - Ready to run!
+2025-11-10 18:19:08,114 - __main__ - INFO - ============================================================
+2025-11-10 18:19:08,115 - __main__ - INFO - System initialized successfully!
+2025-11-10 18:19:08,117 - __main__ - INFO - Starting attendance system...
+2025-11-10 18:19:08,118 - __main__ - INFO - Sync worker started
+2025-11-10 18:19:08,118 - __main__ - INFO - Recognition worker started
+2025-11-10 18:19:10,507 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:10,510 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:13,431 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:13,434 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:16,115 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:16,226 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:16,228 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:19,550 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:19,767 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:19,769 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:21,391 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:23,239 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:23,244 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:25,851 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:26,188 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:26,190 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:28,558 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:28,787 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:28,790 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:30,868 - __main__ - INFO - TIME-OUT MODE ENABLED
+2025-11-10 18:19:32,806 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:32,917 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:35,221 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:35,228 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:37,863 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:40,409 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:42,984 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:45,487 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:47,171 - __main__ - INFO - TIME-IN MODE
+2025-11-10 18:19:48,676 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:48,678 - __main__ - INFO - Prompting time-out for Test Worker
+2025-11-10 18:19:50,085 - __main__ - INFO - TIME-OUT MODE ENABLED
+2025-11-10 18:19:51,811 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:53,938 - __main__ - INFO - Time-out prompt timed out
+2025-11-10 18:19:53,974 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-10 18:19:56,832 - __main__ - INFO - Quit key pressed
+2025-11-10 18:19:56,832 - __main__ - INFO - Shutting down system...
+2025-11-10 18:19:57,616 - __main__ - INFO - Recognition worker stopped
+2025-11-10 18:19:59,846 - utils.camera - INFO - Releasing camera...
+2025-11-10 18:20:00,138 - utils.camera - INFO - Camera released
+2025-11-10 18:20:00,158 - utils.display - INFO - Display window destroyed
+2025-11-10 18:20:00,160 - config.database - INFO - MySQL connection closed
+2025-11-10 18:20:00,162 - __main__ - INFO - Shutdown complete
