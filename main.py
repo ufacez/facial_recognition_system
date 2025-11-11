@@ -3,6 +3,7 @@ import threading
 import time
 import sys
 import cv2
+import numpy as np
 from datetime import datetime
 from typing import Optional, Dict, Any, Tuple
 from config.settings import Config
@@ -54,13 +55,16 @@ class AttendanceSystem:
         # Performance optimization
         self.target_fps = 30
         self.frame_time = 1.0 / self.target_fps
-        self.skip_frames = 3  # Process every 3rd frame for recognition
+        self.skip_frames = 2
         self.frame_counter = 0
         
         # Threading
         self.sync_thread: Optional[threading.Thread] = None
-        self.last_worker_info: Optional[Dict[str, Any]] = None
-        self.show_result_lock = threading.Lock()
+        
+        # Success display overlay (non-blocking)
+        self.success_overlay: Optional[Dict[str, Any]] = None
+        self.overlay_lock = threading.Lock()
+        self.overlay_end_time: Optional[float] = None
     
     def initialize(self) -> bool:
         """Initialize all system components"""
@@ -104,11 +108,11 @@ class AttendanceSystem:
             self.gpio.add_button_callback(self._handle_timeout_button)
             logger.info("GPIO initialized")
             
-            # Create display window (FULLSCREEN)
+            # Create display window (WINDOWED)
             logger.info("Initializing display...")
             self.display = Display()
-            self.display.create_window(fullscreen=True)  # Changed to fullscreen
-            logger.info("Display initialized (fullscreen)")
+            self.display.create_window(fullscreen=False)
+            logger.info("Display initialized (windowed)")
             
             # Load face encodings
             logger.info("Loading face encodings...")
@@ -136,9 +140,6 @@ class AttendanceSystem:
         self.sync_thread = threading.Thread(target=self._sync_worker, daemon=True)
         self.sync_thread.start()
         
-        # Show startup message briefly
-        self.display.show_message("TrackSite Ready", duration_ms=1000)
-        
         try:
             last_frame_time = time.time()
             fps_values = []
@@ -158,11 +159,11 @@ class AttendanceSystem:
                 
                 # Process recognition (every N frames for performance)
                 worker_info = None
-                if self.frame_counter % self.skip_frames == 0:
+                if self.frame_counter % self.skip_frames == 0 and self.success_overlay is None:
                     worker_info, frame = self.face_recognizer.recognize_face(frame)
                     
                     if worker_info:
-                        self._handle_recognition(worker_info, frame)
+                        self._handle_recognition(worker_info)
                 
                 # Add status overlay
                 status = self._get_status_text(current_fps)
@@ -172,11 +173,20 @@ class AttendanceSystem:
                 if self.timeout_mode:
                     frame = self.display.add_overlay(
                         frame,
-                        "⏱ TIME-OUT MODE",
+                        "TIME-OUT MODE",
                         position=(50, 50),
                         color=(0, 165, 255),
                         font_scale=1.5
                     )
+                
+                # Draw success overlay if active (NON-BLOCKING)
+                with self.overlay_lock:
+                    if self.success_overlay is not None:
+                        if time.time() < self.overlay_end_time:
+                            frame = self._draw_success_overlay(frame, self.success_overlay)
+                        else:
+                            self.success_overlay = None
+                            self.overlay_end_time = None
                 
                 # Display frame
                 self.display.show_frame(frame)
@@ -191,7 +201,7 @@ class AttendanceSystem:
                 
                 # Handle keyboard
                 key = self.display.wait_key(1)
-                if key == ord('q') or key == 27:  # q or ESC
+                if key == ord('q') or key == 27:
                     logger.info("Quit key pressed")
                     break
                 elif key == ord('t'):
@@ -199,25 +209,22 @@ class AttendanceSystem:
                 elif key == ord('r'):
                     self._reload_encodings()
                 
-                # Frame limiting for consistent FPS
+                # Frame limiting
                 elapsed = time.time() - loop_start
                 if elapsed < self.frame_time:
                     time.sleep(self.frame_time - elapsed)
         
         except KeyboardInterrupt:
             logger.info("Keyboard interrupt received")
-        
         except Exception as e:
             logger.exception(f"Error in main loop: {e}")
-        
         finally:
             self.shutdown()
     
-    def _handle_recognition(self, worker_info: Dict[str, Any], frame):
-        """Handle recognized worker"""
+    def _handle_recognition(self, worker_info: Dict[str, Any]):
+        """Handle recognized worker - NON-BLOCKING"""
         now = datetime.now()
         
-        # Prevent rapid re-processing
         if self.last_recognition_time:
             if (now - self.last_recognition_time).total_seconds() < 3:
                 return
@@ -229,226 +236,181 @@ class AttendanceSystem:
         
         logger.info(f"Recognized: {worker_name} (ID: {worker_id})")
         
-        # Process in background to avoid lag
-        threading.Thread(
-            target=self._process_attendance,
-            args=(worker_info, frame.copy()),
-            daemon=True
-        ).start()
+        result = self._process_attendance(worker_info)
+        self._show_result_overlay(result, worker_name)
     
-    def _process_attendance(self, worker_info: Dict[str, Any], frame):
-        """Process attendance (runs in background)"""
+    def _process_attendance(self, worker_info: Dict[str, Any]) -> Dict[str, Any]:
+        """Process attendance (synchronous, fast)"""
         worker_id = worker_info['worker_id']
-        worker_name = f"{worker_info['first_name']} {worker_info['last_name']}"
         
-        with self.show_result_lock:
-            if self.timeout_mode:
-                # Time-out mode - explicitly timing out
-                result = self.attendance_logger.log_timeout(worker_id)
-                self._show_result(result, worker_name, frame)
-                
-                if result['success']:
-                    self.timeout_mode = False
-                    self.gpio.set_led(False)
-            else:
-                # Time-in mode - only time in
-                result = self.attendance_logger.log_timein(worker_id)
-                self._show_result(result, worker_name, frame)
+        if self.timeout_mode:
+            result = self.attendance_logger.log_timeout(worker_id)
+            if result['success']:
+                self.timeout_mode = False
+                self.gpio.set_led(False)
+        else:
+            result = self.attendance_logger.log_timein(worker_id)
+        
+        return result
     
-    def _show_result(self, result: Dict[str, Any], worker_name: str, frame):
-        """Display result with LARGE, CLEAR visual indicators on screen"""
+    def _show_result_overlay(self, result: Dict[str, Any], worker_name: str):
+        """Set success overlay data (non-blocking)"""
         current_time = datetime.now()
         
-        # Get frame dimensions
+        overlay_data = {
+            'worker_name': worker_name,
+            'result': result,
+            'timestamp': current_time
+        }
+        
+        with self.overlay_lock:
+            self.success_overlay = overlay_data
+            self.overlay_end_time = time.time() + 3.0
+    
+    def _draw_success_overlay(self, frame: np.ndarray, overlay_data: Dict[str, Any]) -> np.ndarray:
+        """Draw success overlay on frame"""
+        result = overlay_data['result']
+        worker_name = overlay_data['worker_name']
+        timestamp = overlay_data['timestamp']
+        
         h, w = frame.shape[:2]
+        overlay_frame = frame.copy()
+        
+        # Dark background
+        overlay_bg = overlay_frame.copy()
+        cv2.rectangle(overlay_bg, (0, 0), (w, h), (0, 0, 0), -1)
+        cv2.addWeighted(overlay_bg, 0.7, overlay_frame, 0.3, 0, overlay_frame)
         
         if result['success']:
             action = result.get('action', 'unknown')
             
             if action == 'timein':
-                # TIME-IN SUCCESS - GREEN
                 status_icon = "TIME IN"
-                main_message = "SUCCESS!"
-                worker_text = worker_name
-                time_str = result.get('time_in', current_time.strftime('%I:%M:%S %p'))
+                time_str = result.get('time_in', timestamp.strftime('%I:%M:%S %p'))
                 detail_text = f"Clocked In: {time_str}"
-                icon_color = (0, 255, 0)  # Green
-                bg_color = (0, 100, 0)  # Dark green
-                
-                logger.info(f"TIME IN SUCCESS: {worker_name} at {time_str}")
-            
+                icon_color = (0, 255, 0)
+                bg_color = (0, 120, 0)
             elif action == 'timeout':
-                # TIME-OUT SUCCESS - ORANGE
                 status_icon = "TIME OUT"
-                main_message = "SUCCESS!"
-                worker_text = worker_name
                 hours = result.get('hours_worked', '0.00')
-                time_str = current_time.strftime('%I:%M:%S %p')
-                detail_text = f"Clocked Out: {time_str} | {hours} hrs"
-                icon_color = (0, 200, 255)  # Orange
-                bg_color = (0, 80, 100)  # Dark orange
-                
-                logger.info(f"TIME OUT SUCCESS: {worker_name} - {hours} hours worked")
-            
+                time_str = timestamp.strftime('%I:%M:%S %p')
+                detail_text = f"Time: {time_str} | Hours: {hours}"
+                icon_color = (0, 200, 255)
+                bg_color = (0, 80, 120)
             elif action == 'already_in':
-                # ALREADY TIMED IN - YELLOW
                 status_icon = "ALREADY IN"
-                main_message = "ALREADY CLOCKED IN"
-                worker_text = worker_name
-                detail_text = "Press 'T' to enable Time-Out"
-                icon_color = (0, 255, 255)  # Yellow
-                bg_color = (0, 100, 100)  # Dark yellow
-                
-                logger.info(f"Already timed in: {worker_name}")
-            
+                detail_text = "See supervisor"
+                icon_color = (0, 255, 255)
+                bg_color = (0, 120, 120)
             elif action == 'completed':
-                # ALREADY COMPLETED - CYAN
-                status_icon = "COMPLETED"
-                main_message = "DONE FOR TODAY"
-                worker_text = worker_name
-                detail_text = "Attendance already recorded"
-                icon_color = (255, 255, 0)  # Cyan
-                bg_color = (100, 100, 0)  # Dark cyan
-                
-                logger.info(f"Already completed: {worker_name}")
-            
+                status_icon = "DONE"
+                detail_text = "Thank you!"
+                icon_color = (255, 200, 0)
+                bg_color = (120, 100, 0)
             else:
                 status_icon = "SUCCESS"
-                main_message = "COMPLETE"
-                worker_text = worker_name
-                detail_text = current_time.strftime('%I:%M:%S %p')
+                detail_text = timestamp.strftime('%I:%M:%S %p')
                 icon_color = (0, 255, 0)
-                bg_color = (0, 100, 0)
+                bg_color = (0, 120, 0)
             
-            # CREATE FULL SCREEN DISPLAY
-            display_frame = frame.copy()
+            # Top banner
+            cv2.rectangle(overlay_frame, (0, 0), (w, 60), bg_color, -1)
+            cv2.rectangle(overlay_frame, (0, 0), (w, 60), icon_color, 3)
             
-            # Full dark overlay for maximum contrast
-            overlay = display_frame.copy()
-            cv2.rectangle(overlay, (0, 0), (w, h), (0, 0, 0), -1)
-            cv2.addWeighted(overlay, 0.8, display_frame, 0.2, 0, display_frame)
-            
-            # Top banner with status
-            cv2.rectangle(display_frame, (0, 0), (w, 150), bg_color, -1)
-            cv2.rectangle(display_frame, (0, 0), (w, 150), icon_color, 5)
-            
-            # HUGE Status Icon
-            text_size = cv2.getTextSize(status_icon, cv2.FONT_HERSHEY_BOLD, 3.0, 8)[0]
+            # Status
+            text_size = cv2.getTextSize(status_icon, cv2.FONT_HERSHEY_SIMPLEX, 1.2, 3)[0]
             text_x = (w - text_size[0]) // 2
-            cv2.putText(display_frame, status_icon, (text_x, 100),
-                       cv2.FONT_HERSHEY_BOLD, 3.0, (255, 255, 255), 8)
-            
-            # SUCCESS message
-            text_size = cv2.getTextSize(main_message, cv2.FONT_HERSHEY_BOLD, 2.5, 6)[0]
-            text_x = (w - text_size[0]) // 2
-            cv2.putText(display_frame, main_message, (text_x, 250),
-                       cv2.FONT_HERSHEY_BOLD, 2.5, icon_color, 6)
+            cv2.putText(overlay_frame, status_icon, (text_x, 42),
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
             
             # Worker name
-            text_size = cv2.getTextSize(worker_text, cv2.FONT_HERSHEY_SIMPLEX, 2.0, 5)[0]
+            text_size = cv2.getTextSize(worker_name, cv2.FONT_HERSHEY_SIMPLEX, 1.0, 2)[0]
             text_x = (w - text_size[0]) // 2
-            cv2.putText(display_frame, worker_text, (text_x, 350),
-                       cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 255, 255), 5)
+            cv2.putText(overlay_frame, worker_name, (text_x, 110),
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
             
-            # Detail text (time/hours)
-            text_size = cv2.getTextSize(detail_text, cv2.FONT_HERSHEY_SIMPLEX, 1.5, 4)[0]
+            # Detail
+            text_size = cv2.getTextSize(detail_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
             text_x = (w - text_size[0]) // 2
-            cv2.putText(display_frame, detail_text, (text_x, 440),
-                       cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 0), 4)
+            cv2.putText(overlay_frame, detail_text, (text_x, 150),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, icon_color, 2)
             
-            # Date at bottom
-            date_str = current_time.strftime('%B %d, %Y - %I:%M:%S %p')
-            text_size = cv2.getTextSize(date_str, cv2.FONT_HERSHEY_SIMPLEX, 1.2, 3)[0]
-            text_x = (w - text_size[0]) // 2
-            cv2.putText(display_frame, date_str, (text_x, h - 80),
-                       cv2.FONT_HERSHEY_SIMPLEX, 1.2, (200, 200, 200), 3)
-            
-            # Add checkmark or icon
+            # Checkmark
+            center_x = w // 2
             if action in ['timein', 'timeout']:
-                # Draw big checkmark
-                check_points = [
-                    (w//2 - 80, 520),
-                    (w//2 - 40, 570),
-                    (w//2 + 80, 470)
-                ]
-                for i in range(len(check_points) - 1):
-                    cv2.line(display_frame, check_points[i], check_points[i+1], 
-                            icon_color, 15)
+                cv2.circle(overlay_frame, (center_x, 230), 50, icon_color, 5)
+                pts = np.array([
+                    [center_x - 20, 230],
+                    [center_x - 5, 245],
+                    [center_x + 25, 215]
+                ], np.int32)
+                cv2.polylines(overlay_frame, [pts], False, icon_color, 8)
             
-            # Show for 4 seconds
-            self.display.show_frame(display_frame)
-            time.sleep(4)
-        
-        else:
-            # ERROR DISPLAY - RED
-            display_frame = frame.copy()
-            
-            # Full dark overlay
-            overlay = display_frame.copy()
-            cv2.rectangle(overlay, (0, 0), (w, h), (0, 0, 0), -1)
-            cv2.addWeighted(overlay, 0.8, display_frame, 0.2, 0, display_frame)
-            
-            # Red banner
-            cv2.rectangle(display_frame, (0, 0), (w, 150), (0, 0, 100), -1)
-            cv2.rectangle(display_frame, (0, 0), (w, 150), (0, 0, 255), 5)
-            
-            # ERROR text
-            text_size = cv2.getTextSize("ERROR", cv2.FONT_HERSHEY_BOLD, 3.0, 8)[0]
+            # Date
+            date_str = timestamp.strftime('%b %d, %Y')
+            text_size = cv2.getTextSize(date_str, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)[0]
             text_x = (w - text_size[0]) // 2
-            cv2.putText(display_frame, "ERROR", (text_x, 100),
-                       cv2.FONT_HERSHEY_BOLD, 3.0, (255, 255, 255), 8)
-            
-            # Error message
-            message = result.get('message', 'Unknown error')
-            logger.warning(f"Attendance error: {message}")
-            
-            # Split long messages
-            words = message.split()
-            lines = []
-            current_line = ""
-            for word in words:
-                test_line = current_line + " " + word if current_line else word
-                text_size = cv2.getTextSize(test_line, cv2.FONT_HERSHEY_SIMPLEX, 1.8, 4)[0]
-                if text_size[0] < w - 100:
-                    current_line = test_line
-                else:
-                    lines.append(current_line)
-                    current_line = word
-            if current_line:
-                lines.append(current_line)
-            
-            # Draw message lines
-            y_pos = 250
-            for line in lines:
-                text_size = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, 1.8, 4)[0]
-                text_x = (w - text_size[0]) // 2
-                cv2.putText(display_frame, line, (text_x, y_pos),
-                           cv2.FONT_HERSHEY_SIMPLEX, 1.8, (0, 0, 255), 4)
-                y_pos += 70
+            cv2.putText(overlay_frame, date_str, (text_x, h - 50),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (180, 180, 180), 2)
             
             # Time
-            time_str = current_time.strftime('%I:%M:%S %p')
-            text_size = cv2.getTextSize(time_str, cv2.FONT_HERSHEY_SIMPLEX, 1.5, 3)[0]
+            time_display = timestamp.strftime('%I:%M:%S %p')
+            text_size = cv2.getTextSize(time_display, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
             text_x = (w - text_size[0]) // 2
-            cv2.putText(display_frame, time_str, (text_x, h - 100),
-                       cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv2.putText(overlay_frame, time_display, (text_x, h - 20),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (220, 220, 220), 2)
+        else:
+            # Error overlay
+            cv2.rectangle(overlay_frame, (0, 0), (w, 60), (0, 80, 120), -1)
+            cv2.rectangle(overlay_frame, (0, 0), (w, 60), (0, 165, 255), 3)
             
-            # Draw X mark
-            cv2.line(display_frame, (w//2 - 60, 470), (w//2 + 60, 570), (0, 0, 255), 15)
-            cv2.line(display_frame, (w//2 + 60, 470), (w//2 - 60, 570), (0, 0, 255), 15)
+            text_size = cv2.getTextSize("PLEASE TRY AGAIN", cv2.FONT_HERSHEY_SIMPLEX, 1.0, 2)[0]
+            text_x = (w - text_size[0]) // 2
+            cv2.putText(overlay_frame, "PLEASE TRY AGAIN", (text_x, 42),
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
             
-            self.display.show_frame(display_frame)
-            time.sleep(3)
+            message = result.get('message', 'Unknown error')
+            friendly_messages = {
+                'Already scanned recently': 'Already recorded.\nPlease wait.',
+                'Attendance already completed today': 'All done for today.\nThank you!',
+                'No time-in found for today': 'Please clock in first.',
+                'Already timed in. Ready for time-out?': 'Already clocked in.\nSee supervisor.'
+            }
+            
+            display_message = friendly_messages.get(message, message)
+            lines = display_message.split('\n')
+            y_pos = 120
+            for line in lines:
+                text_size = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, 0.8, 2)[0]
+                text_x = (w - text_size[0]) // 2
+                cv2.putText(overlay_frame, line, (text_x, y_pos),
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+                y_pos += 40
+            
+            # X mark
+            center_x = w // 2
+            center_y = 230
+            cv2.circle(overlay_frame, (center_x, center_y), 50, (0, 165, 255), 5)
+            cv2.line(overlay_frame, (center_x - 20, center_y - 20), 
+                    (center_x + 20, center_y + 20), (0, 165, 255), 8)
+            cv2.line(overlay_frame, (center_x + 20, center_y - 20), 
+                    (center_x - 20, center_y + 20), (0, 165, 255), 8)
+            
+            # Time
+            time_str = timestamp.strftime('%I:%M:%S %p')
+            text_size = cv2.getTextSize(time_str, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
+            text_x = (w - text_size[0]) // 2
+            cv2.putText(overlay_frame, time_str, (text_x, h - 30),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2)
+        
+        return overlay_frame
     
     def _toggle_timeout_mode(self):
         """Toggle time-out mode"""
         self.timeout_mode = not self.timeout_mode
         self.gpio.set_led(self.timeout_mode)
-        
-        mode_text = "⏱ TIME-OUT MODE" if self.timeout_mode else "✅ TIME-IN MODE"
+        mode_text = "TIME-OUT MODE" if self.timeout_mode else "TIME-IN MODE"
         logger.info(mode_text)
-        
-        self.display.show_message(mode_text, duration_ms=1500)
     
     def _handle_timeout_button(self):
         """GPIO button callback"""
@@ -459,7 +421,7 @@ class AttendanceSystem:
         """Reload face encodings"""
         logger.info("Reloading face encodings...")
         count = self.face_recognizer.load_encodings()
-        self.display.show_message(f"Loaded {count} faces", duration_ms=2000)
+        logger.info(f"Reloaded {count} faces")
     
     def _get_status_text(self, fps: int = 0) -> str:
         """Get status text"""
@@ -500,7 +462,6 @@ class AttendanceSystem:
                     result = self.sync_manager.sync_all()
                     if result['synced'] > 0:
                         logger.info(f"Synced {result['synced']} records")
-            
             except Exception as e:
                 logger.error(f"Sync error: {e}")
         

@@ -807,3 +807,369 @@ AttributeError: 'Camera' object has no attribute 'set_fps'
 2025-11-11 07:34:10,732 - utils.display - INFO - Display destroyed
 2025-11-11 07:34:10,733 - config.database - INFO - MySQL closed
 2025-11-11 07:34:10,738 - __main__ - INFO - Shutdown complete
+2025-11-11 08:10:13,588 - __main__ - INFO - Creating system instance...
+2025-11-11 08:10:13,588 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-11 08:10:13,589 - __main__ - INFO - Initializing...
+2025-11-11 08:10:13,589 - __main__ - INFO - Initializing components...
+2025-11-11 08:10:13,589 - __main__ - INFO - Connecting to databases...
+2025-11-11 08:10:13,590 - config.database - INFO - SQLite initialized
+2025-11-11 08:10:13,672 - config.database - INFO - MySQL connected
+2025-11-11 08:10:13,672 - __main__ - INFO - MySQL connected
+2025-11-11 08:10:13,672 - __main__ - INFO - SQLite database ready
+2025-11-11 08:10:13,672 - __main__ - INFO - Initializing core components...
+2025-11-11 08:10:13,672 - __main__ - INFO - Core components initialized
+2025-11-11 08:10:13,672 - __main__ - INFO - Initializing camera...
+2025-11-11 08:10:13,673 - utils.camera - INFO - Opening camera 0...
+2025-11-11 08:10:17,095 - utils.camera - INFO - Camera opened successfully
+2025-11-11 08:10:26,653 - utils.camera - INFO - Camera initialized
+2025-11-11 08:10:26,654 - utils.camera - INFO - Resolution: 640x480
+2025-11-11 08:10:26,654 - utils.camera - INFO - FPS: 30
+2025-11-11 08:10:26,661 - utils.camera - INFO - FPS set to 30
+2025-11-11 08:10:26,672 - utils.camera - INFO - Resolution set to 640x480
+2025-11-11 08:10:26,673 - __main__ - INFO - Camera initialized (640x480 @ 30fps)
+2025-11-11 08:10:26,673 - __main__ - INFO - Initializing GPIO...
+2025-11-11 08:10:26,673 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-11 08:10:26,674 - __main__ - INFO - GPIO initialized
+2025-11-11 08:10:26,674 - __main__ - INFO - Initializing display...
+2025-11-11 08:10:26,752 - utils.display - INFO - Display window created (fullscreen)
+2025-11-11 08:10:26,753 - __main__ - INFO - Display initialized (fullscreen)
+2025-11-11 08:10:26,754 - __main__ - INFO - Loading face encodings...
+2025-11-11 08:10:26,754 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-11 08:10:26,838 - config.database - INFO - Cached 1 encodings
+2025-11-11 08:10:26,838 - models.face_recognizer - INFO - Loaded 1 encodings
+2025-11-11 08:10:26,839 - __main__ - INFO - Loaded 1 face encodings
+2025-11-11 08:10:26,839 - __main__ - INFO - ============================================================
+2025-11-11 08:10:26,839 - __main__ - INFO - System ready!
+2025-11-11 08:10:26,839 - __main__ - INFO - ============================================================
+2025-11-11 08:10:26,839 - __main__ - INFO - System ready!
+2025-11-11 08:10:26,841 - __main__ - INFO - Starting attendance system...
+2025-11-11 08:10:26,841 - __main__ - INFO - Sync worker started
+2025-11-11 08:10:28,068 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:10:28,074 - __main__ - ERROR - Error in main loop: module 'cv2' has no attribute 'FONT_HERSHEY_BOLD'
+Traceback (most recent call last):
+  File "d:\facial_recognition_system\main.py", line 188, in run
+    frame = self._draw_success_overlay(frame, self.success_overlay)
+  File "d:\facial_recognition_system\main.py", line 368, in _draw_success_overlay
+    text_size = cv2.getTextSize("✗ ERROR", cv2.FONT_HERSHEY_BOLD, 2.5, 6)[0]
+                                           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cv2' has no attribute 'FONT_HERSHEY_BOLD'
+2025-11-11 08:10:28,079 - __main__ - INFO - Shutting down...
+2025-11-11 08:10:31,090 - utils.camera - INFO - Releasing camera...
+2025-11-11 08:10:31,450 - utils.camera - INFO - Camera released
+2025-11-11 08:10:31,481 - utils.display - INFO - Display destroyed
+2025-11-11 08:10:31,513 - config.database - INFO - MySQL closed
+2025-11-11 08:10:31,528 - __main__ - INFO - Shutdown complete
+2025-11-11 08:10:42,536 - __main__ - INFO - Creating system instance...
+2025-11-11 08:10:42,536 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-11 08:10:42,536 - __main__ - INFO - Initializing...
+2025-11-11 08:10:42,536 - __main__ - INFO - Initializing components...
+2025-11-11 08:10:42,537 - __main__ - INFO - Connecting to databases...
+2025-11-11 08:10:42,538 - config.database - INFO - SQLite initialized
+2025-11-11 08:10:42,572 - config.database - INFO - MySQL connected
+2025-11-11 08:10:42,572 - __main__ - INFO - MySQL connected
+2025-11-11 08:10:42,572 - __main__ - INFO - SQLite database ready
+2025-11-11 08:10:42,573 - __main__ - INFO - Initializing core components...
+2025-11-11 08:10:42,573 - __main__ - INFO - Core components initialized
+2025-11-11 08:10:42,573 - __main__ - INFO - Initializing camera...
+2025-11-11 08:10:42,573 - utils.camera - INFO - Opening camera 0...
+2025-11-11 08:10:45,725 - utils.camera - INFO - Camera opened successfully
+2025-11-11 08:10:55,173 - utils.camera - INFO - Camera initialized
+2025-11-11 08:10:55,174 - utils.camera - INFO - Resolution: 640x480
+2025-11-11 08:10:55,174 - utils.camera - INFO - FPS: 30
+2025-11-11 08:10:55,183 - utils.camera - INFO - FPS set to 30
+2025-11-11 08:10:55,199 - utils.camera - INFO - Resolution set to 640x480
+2025-11-11 08:10:55,200 - __main__ - INFO - Camera initialized (640x480 @ 30fps)
+2025-11-11 08:10:55,200 - __main__ - INFO - Initializing GPIO...
+2025-11-11 08:10:55,200 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-11 08:10:55,201 - __main__ - INFO - GPIO initialized
+2025-11-11 08:10:55,201 - __main__ - INFO - Initializing display...
+2025-11-11 08:10:55,270 - utils.display - INFO - Display window created (fullscreen)
+2025-11-11 08:10:55,270 - __main__ - INFO - Display initialized (fullscreen)
+2025-11-11 08:10:55,271 - __main__ - INFO - Loading face encodings...
+2025-11-11 08:10:55,271 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-11 08:10:55,369 - config.database - INFO - Cached 1 encodings
+2025-11-11 08:10:55,370 - models.face_recognizer - INFO - Loaded 1 encodings
+2025-11-11 08:10:55,370 - __main__ - INFO - Loaded 1 face encodings
+2025-11-11 08:10:55,370 - __main__ - INFO - ============================================================
+2025-11-11 08:10:55,371 - __main__ - INFO - System ready!
+2025-11-11 08:10:55,371 - __main__ - INFO - ============================================================
+2025-11-11 08:10:55,371 - __main__ - INFO - System ready!
+2025-11-11 08:10:55,373 - __main__ - INFO - Starting attendance system...
+2025-11-11 08:10:55,373 - __main__ - INFO - Sync worker started
+2025-11-11 08:10:56,826 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:10:56,831 - __main__ - ERROR - Error in main loop: module 'cv2' has no attribute 'FONT_HERSHEY_BOLD'
+Traceback (most recent call last):
+  File "d:\facial_recognition_system\main.py", line 188, in run
+    frame = self._draw_success_overlay(frame, self.success_overlay)
+  File "d:\facial_recognition_system\main.py", line 368, in _draw_success_overlay
+    text_size = cv2.getTextSize("✗ ERROR", cv2.FONT_HERSHEY_BOLD, 2.5, 6)[0]
+                                           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cv2' has no attribute 'FONT_HERSHEY_BOLD'
+2025-11-11 08:10:56,837 - __main__ - INFO - Shutting down...
+2025-11-11 08:10:59,849 - utils.camera - INFO - Releasing camera...
+2025-11-11 08:11:00,165 - utils.camera - INFO - Camera released
+2025-11-11 08:11:00,199 - utils.display - INFO - Display destroyed
+2025-11-11 08:11:00,236 - config.database - INFO - MySQL closed
+2025-11-11 08:11:00,317 - __main__ - INFO - Shutdown complete
+2025-11-11 08:11:59,841 - __main__ - INFO - Creating system instance...
+2025-11-11 08:11:59,841 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-11 08:11:59,841 - __main__ - INFO - Initializing...
+2025-11-11 08:11:59,842 - __main__ - INFO - Initializing components...
+2025-11-11 08:11:59,842 - __main__ - INFO - Connecting to databases...
+2025-11-11 08:11:59,844 - config.database - INFO - SQLite initialized
+2025-11-11 08:11:59,887 - config.database - INFO - MySQL connected
+2025-11-11 08:11:59,887 - __main__ - INFO - MySQL connected
+2025-11-11 08:11:59,887 - __main__ - INFO - SQLite database ready
+2025-11-11 08:11:59,887 - __main__ - INFO - Initializing core components...
+2025-11-11 08:11:59,887 - __main__ - INFO - Core components initialized
+2025-11-11 08:11:59,888 - __main__ - INFO - Initializing camera...
+2025-11-11 08:11:59,888 - utils.camera - INFO - Opening camera 0...
+2025-11-11 08:12:03,401 - utils.camera - INFO - Camera opened successfully
+2025-11-11 08:12:12,952 - utils.camera - INFO - Camera initialized
+2025-11-11 08:12:12,954 - utils.camera - INFO - Resolution: 640x480
+2025-11-11 08:12:12,954 - utils.camera - INFO - FPS: 30
+2025-11-11 08:12:12,963 - utils.camera - INFO - FPS set to 30
+2025-11-11 08:12:12,972 - utils.camera - INFO - Resolution set to 640x480
+2025-11-11 08:12:12,973 - __main__ - INFO - Camera initialized (640x480 @ 30fps)
+2025-11-11 08:12:12,973 - __main__ - INFO - Initializing GPIO...
+2025-11-11 08:12:12,973 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-11 08:12:12,973 - __main__ - INFO - GPIO initialized
+2025-11-11 08:12:12,973 - __main__ - INFO - Initializing display...
+2025-11-11 08:12:13,033 - utils.display - INFO - Display window created (fullscreen)
+2025-11-11 08:12:13,033 - __main__ - INFO - Display initialized (fullscreen)
+2025-11-11 08:12:13,033 - __main__ - INFO - Loading face encodings...
+2025-11-11 08:12:13,034 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-11 08:12:13,122 - config.database - INFO - Cached 1 encodings
+2025-11-11 08:12:13,123 - models.face_recognizer - INFO - Loaded 1 encodings
+2025-11-11 08:12:13,124 - __main__ - INFO - Loaded 1 face encodings
+2025-11-11 08:12:13,124 - __main__ - INFO - ============================================================
+2025-11-11 08:12:13,124 - __main__ - INFO - System ready!
+2025-11-11 08:12:13,124 - __main__ - INFO - ============================================================
+2025-11-11 08:12:13,124 - __main__ - INFO - System ready!
+2025-11-11 08:12:13,126 - __main__ - INFO - Starting attendance system...
+2025-11-11 08:12:13,127 - __main__ - INFO - Sync worker started
+2025-11-11 08:12:17,056 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:12:20,879 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:12:24,537 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:12:28,378 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:12:32,183 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:12:34,328 - __main__ - INFO - Quit key pressed
+2025-11-11 08:12:34,328 - __main__ - INFO - Shutting down...
+2025-11-11 08:12:37,343 - utils.camera - INFO - Releasing camera...
+2025-11-11 08:12:37,693 - utils.camera - INFO - Camera released
+2025-11-11 08:12:37,721 - utils.display - INFO - Display destroyed
+2025-11-11 08:12:37,736 - config.database - INFO - MySQL closed
+2025-11-11 08:12:37,738 - __main__ - INFO - Shutdown complete
+2025-11-13 08:15:34,025 - __main__ - INFO - Creating system instance...
+2025-11-13 08:15:34,025 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-13 08:15:34,025 - __main__ - INFO - Initializing...
+2025-11-13 08:15:34,025 - __main__ - INFO - Initializing components...
+2025-11-13 08:15:34,026 - __main__ - INFO - Connecting to databases...
+2025-11-13 08:15:34,027 - config.database - INFO - SQLite initialized
+2025-11-13 08:15:34,085 - config.database - INFO - MySQL connected
+2025-11-13 08:15:34,086 - __main__ - INFO - MySQL connected
+2025-11-13 08:15:34,086 - __main__ - INFO - SQLite database ready
+2025-11-13 08:15:34,086 - __main__ - INFO - Initializing core components...
+2025-11-13 08:15:34,086 - __main__ - INFO - Core components initialized
+2025-11-13 08:15:34,087 - __main__ - INFO - Initializing camera...
+2025-11-13 08:15:34,087 - utils.camera - INFO - Opening camera 0...
+2025-11-13 08:15:37,764 - utils.camera - INFO - Camera opened successfully
+2025-11-13 08:15:48,560 - utils.camera - INFO - Camera initialized
+2025-11-13 08:15:48,561 - utils.camera - INFO - Resolution: 640x480
+2025-11-13 08:15:48,561 - utils.camera - INFO - FPS: 30
+2025-11-13 08:15:48,571 - utils.camera - INFO - FPS set to 30
+2025-11-13 08:15:48,589 - utils.camera - INFO - Resolution set to 640x480
+2025-11-13 08:15:48,590 - __main__ - INFO - Camera initialized (640x480 @ 30fps)
+2025-11-13 08:15:48,591 - __main__ - INFO - Initializing GPIO...
+2025-11-13 08:15:48,591 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-13 08:15:48,591 - __main__ - INFO - GPIO initialized
+2025-11-13 08:15:48,591 - __main__ - INFO - Initializing display...
+2025-11-13 08:15:48,648 - utils.display - INFO - Display window created (fullscreen)
+2025-11-13 08:15:48,649 - __main__ - INFO - Display initialized (fullscreen)
+2025-11-13 08:15:48,649 - __main__ - INFO - Loading face encodings...
+2025-11-13 08:15:48,649 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-13 08:15:48,724 - config.database - INFO - Cached 1 encodings
+2025-11-13 08:15:48,725 - models.face_recognizer - INFO - Loaded 1 encodings
+2025-11-13 08:15:48,726 - __main__ - INFO - Loaded 1 face encodings
+2025-11-13 08:15:48,726 - __main__ - INFO - ============================================================
+2025-11-13 08:15:48,726 - __main__ - INFO - System ready!
+2025-11-13 08:15:48,727 - __main__ - INFO - ============================================================
+2025-11-13 08:15:48,727 - __main__ - INFO - System ready!
+2025-11-13 08:15:48,729 - __main__ - INFO - Starting attendance system...
+2025-11-13 08:15:48,730 - __main__ - INFO - Sync worker started
+2025-11-13 08:15:51,059 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:15:54,876 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:15:58,566 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:02,189 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:05,991 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:09,733 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:15,042 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:19,060 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:23,331 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:27,018 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 08:16:28,695 - __main__ - INFO - Quit key pressed
+2025-11-13 08:16:28,696 - __main__ - INFO - Shutting down...
+2025-11-13 08:16:31,698 - utils.camera - INFO - Releasing camera...
+2025-11-13 08:16:32,026 - utils.camera - INFO - Camera released
+2025-11-13 08:16:32,051 - utils.display - INFO - Display destroyed
+2025-11-13 08:16:32,058 - config.database - INFO - MySQL closed
+2025-11-13 08:16:32,068 - __main__ - INFO - Shutdown complete
+2025-11-13 20:16:50,999 - __main__ - INFO - Creating system instance...
+2025-11-13 20:16:51,000 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-13 20:16:51,000 - __main__ - INFO - Initializing...
+2025-11-13 20:16:51,000 - __main__ - INFO - Initializing components...
+2025-11-13 20:16:51,001 - __main__ - INFO - Connecting to databases...
+2025-11-13 20:16:51,002 - config.database - INFO - SQLite initialized
+2025-11-13 20:16:51,046 - config.database - INFO - MySQL connected
+2025-11-13 20:16:51,046 - __main__ - INFO - MySQL connected
+2025-11-13 20:16:51,047 - __main__ - INFO - SQLite database ready
+2025-11-13 20:16:51,048 - __main__ - INFO - Initializing core components...
+2025-11-13 20:16:51,048 - __main__ - INFO - Core components initialized
+2025-11-13 20:16:51,049 - __main__ - INFO - Initializing camera...
+2025-11-13 20:16:51,049 - utils.camera - INFO - Opening camera 0...
+2025-11-13 20:16:54,512 - utils.camera - INFO - Camera opened successfully
+2025-11-13 20:17:04,089 - utils.camera - INFO - Camera initialized
+2025-11-13 20:17:04,090 - utils.camera - INFO - Resolution: 640x480
+2025-11-13 20:17:04,090 - utils.camera - INFO - FPS: 30
+2025-11-13 20:17:04,097 - utils.camera - INFO - FPS set to 30
+2025-11-13 20:17:04,110 - utils.camera - INFO - Resolution set to 640x480
+2025-11-13 20:17:04,110 - __main__ - INFO - Camera initialized (640x480 @ 30fps)
+2025-11-13 20:17:04,110 - __main__ - INFO - Initializing GPIO...
+2025-11-13 20:17:04,110 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-13 20:17:04,111 - __main__ - INFO - GPIO initialized
+2025-11-13 20:17:04,111 - __main__ - INFO - Initializing display...
+2025-11-13 20:17:04,177 - utils.display - INFO - Display window created (fullscreen)
+2025-11-13 20:17:04,177 - __main__ - INFO - Display initialized (fullscreen)
+2025-11-13 20:17:04,177 - __main__ - INFO - Loading face encodings...
+2025-11-13 20:17:04,178 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-13 20:17:04,264 - config.database - INFO - Cached 1 encodings
+2025-11-13 20:17:04,264 - models.face_recognizer - INFO - Loaded 1 encodings
+2025-11-13 20:17:04,265 - __main__ - INFO - Loaded 1 face encodings
+2025-11-13 20:17:04,265 - __main__ - INFO - ============================================================
+2025-11-13 20:17:04,266 - __main__ - INFO - System ready!
+2025-11-13 20:17:04,266 - __main__ - INFO - ============================================================
+2025-11-13 20:17:04,266 - __main__ - INFO - System ready!
+2025-11-13 20:17:04,268 - __main__ - INFO - Starting attendance system...
+2025-11-13 20:17:04,269 - __main__ - INFO - Sync worker started
+2025-11-13 20:17:06,347 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 20:17:07,249 - __main__ - INFO - TIME-OUT MODE
+2025-11-13 20:17:10,368 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 20:17:14,035 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 20:17:17,626 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 20:17:22,161 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 20:17:25,994 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-13 20:17:27,468 - __main__ - INFO - TIME-OUT MODE
+2025-11-13 20:17:28,713 - __main__ - INFO - Quit key pressed
+2025-11-13 20:17:28,714 - __main__ - INFO - Shutting down...
+2025-11-13 20:17:31,727 - utils.camera - INFO - Releasing camera...
+2025-11-13 20:17:32,089 - utils.camera - INFO - Camera released
+2025-11-13 20:17:32,108 - utils.display - INFO - Display destroyed
+2025-11-13 20:17:32,116 - config.database - INFO - MySQL closed
+2025-11-13 20:17:32,116 - __main__ - INFO - Shutdown complete
+2025-11-11 08:24:19,022 - __main__ - INFO - Creating system instance...
+2025-11-11 08:24:19,022 - __main__ - INFO - Initializing TrackSite Attendance System...
+2025-11-11 08:24:19,023 - __main__ - INFO - Initializing...
+2025-11-11 08:24:19,023 - __main__ - INFO - Initializing components...
+2025-11-11 08:24:19,023 - __main__ - INFO - Connecting to databases...
+2025-11-11 08:24:19,024 - config.database - INFO - SQLite initialized
+2025-11-11 08:24:19,118 - config.database - INFO - MySQL connected
+2025-11-11 08:24:19,118 - __main__ - INFO - MySQL connected
+2025-11-11 08:24:19,118 - __main__ - INFO - SQLite database ready
+2025-11-11 08:24:19,118 - __main__ - INFO - Initializing core components...
+2025-11-11 08:24:19,118 - __main__ - INFO - Core components initialized
+2025-11-11 08:24:19,119 - __main__ - INFO - Initializing camera...
+2025-11-11 08:24:19,119 - utils.camera - INFO - Opening camera 0...
+2025-11-11 08:24:22,523 - utils.camera - INFO - Camera opened successfully
+2025-11-11 08:24:32,306 - utils.camera - INFO - Camera initialized
+2025-11-11 08:24:32,307 - utils.camera - INFO - Resolution: 640x480
+2025-11-11 08:24:32,307 - utils.camera - INFO - FPS: 30
+2025-11-11 08:24:32,317 - utils.camera - INFO - FPS set to 30
+2025-11-11 08:24:32,329 - utils.camera - INFO - Resolution set to 640x480
+2025-11-11 08:24:32,329 - __main__ - INFO - Camera initialized (640x480 @ 30fps)
+2025-11-11 08:24:32,330 - __main__ - INFO - Initializing GPIO...
+2025-11-11 08:24:32,330 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-11 08:24:32,330 - __main__ - INFO - GPIO initialized
+2025-11-11 08:24:32,330 - __main__ - INFO - Initializing display...
+2025-11-11 08:24:32,366 - utils.display - INFO - Display window created (1280x720)
+2025-11-11 08:24:32,370 - __main__ - INFO - Display initialized (windowed)
+2025-11-11 08:24:32,370 - __main__ - INFO - Loading face encodings...
+2025-11-11 08:24:32,371 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-11 08:24:32,466 - config.database - INFO - Cached 1 encodings
+2025-11-11 08:24:32,467 - models.face_recognizer - INFO - Loaded 1 encodings
+2025-11-11 08:24:32,467 - __main__ - INFO - Loaded 1 face encodings
+2025-11-11 08:24:32,468 - __main__ - INFO - ============================================================
+2025-11-11 08:24:32,469 - __main__ - INFO - System ready!
+2025-11-11 08:24:32,469 - __main__ - INFO - ============================================================
+2025-11-11 08:24:32,470 - __main__ - INFO - System ready!
+2025-11-11 08:24:32,474 - __main__ - INFO - Starting attendance system...
+2025-11-11 08:24:32,475 - __main__ - INFO - Sync worker started
+2025-11-11 08:24:33,743 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:24:37,774 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:24:40,240 - __main__ - INFO - TIME-OUT MODE
+2025-11-11 08:24:42,417 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:24:46,693 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:24:47,039 - __main__ - INFO - TIME-IN MODE
+2025-11-11 08:24:50,449 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:24:54,517 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:25:01,208 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:25:05,847 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:25:09,719 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:25:14,653 - __main__ - INFO - Recognized: Test Worker (ID: 4)
+2025-11-11 08:25:16,547 - __main__ - INFO - Quit key pressed
+2025-11-11 08:25:16,547 - __main__ - INFO - Shutting down...
+2025-11-11 08:25:19,560 - utils.camera - INFO - Releasing camera...
+2025-11-11 08:25:19,861 - utils.camera - INFO - Camera released
+2025-11-11 08:25:19,893 - utils.display - INFO - Display destroyed
+2025-11-11 08:25:19,897 - config.database - INFO - MySQL closed
+2025-11-11 08:25:19,902 - __main__ - INFO - Shutdown complete
+2025-11-11 08:29:44,635 - main - INFO - Creating system instance...
+2025-11-11 08:29:44,636 - main - INFO - Initializing TrackSite Attendance System...
+2025-11-11 08:29:44,636 - main - INFO - Initializing...
+2025-11-11 08:29:44,636 - main - INFO - Initializing components...
+2025-11-11 08:29:44,636 - main - INFO - Connecting to databases...
+2025-11-11 08:29:44,639 - config.database - INFO - SQLite initialized
+2025-11-11 08:29:44,679 - config.database - INFO - MySQL connected
+2025-11-11 08:29:44,679 - main - INFO - MySQL connected
+2025-11-11 08:29:44,679 - main - INFO - SQLite database ready
+2025-11-11 08:29:44,679 - main - INFO - Initializing core components...
+2025-11-11 08:29:44,680 - main - INFO - Core components initialized
+2025-11-11 08:29:44,680 - main - INFO - Initializing camera...
+2025-11-11 08:29:44,680 - utils.camera - INFO - Opening camera 0...
+2025-11-11 08:29:48,027 - utils.camera - INFO - Camera opened successfully
+2025-11-11 08:29:57,623 - utils.camera - INFO - Camera initialized
+2025-11-11 08:29:57,624 - utils.camera - INFO - Resolution: 640x480
+2025-11-11 08:29:57,625 - utils.camera - INFO - FPS: 30
+2025-11-11 08:29:57,633 - utils.camera - INFO - FPS set to 30
+2025-11-11 08:29:57,646 - utils.camera - INFO - Resolution set to 640x480
+2025-11-11 08:29:57,646 - main - INFO - Camera initialized (640x480 @ 30fps)
+2025-11-11 08:29:57,648 - main - INFO - Initializing GPIO...
+2025-11-11 08:29:57,649 - utils.gpio_handler - INFO - GPIO Handler: PC mode (no hardware)
+2025-11-11 08:29:57,649 - main - INFO - GPIO initialized
+2025-11-11 08:29:57,650 - main - INFO - Initializing display...
+2025-11-11 08:29:57,726 - utils.display - INFO - Display window created (1280x720)
+2025-11-11 08:29:57,734 - main - INFO - Display initialized (windowed)
+2025-11-11 08:29:57,735 - main - INFO - Loading face encodings...
+2025-11-11 08:29:57,736 - models.face_recognizer - INFO - Loading face encodings...
+2025-11-11 08:29:57,851 - config.database - INFO - Cached 2 encodings
+2025-11-11 08:29:57,852 - models.face_recognizer - INFO - Loaded 2 encodings
+2025-11-11 08:29:57,852 - main - INFO - Loaded 2 face encodings
+2025-11-11 08:29:57,852 - main - INFO - ============================================================
+2025-11-11 08:29:57,852 - main - INFO - System ready!
+2025-11-11 08:29:57,853 - main - INFO - ============================================================
+2025-11-11 08:29:57,853 - main - INFO - System ready!
+2025-11-11 08:29:57,854 - main - INFO - Starting attendance system...
+2025-11-11 08:29:57,855 - main - INFO - Sync worker started
+2025-11-11 08:29:59,987 - main - INFO - Recognized: Ean Paolo Espiritu (ID: 1)
+2025-11-11 08:30:03,852 - main - INFO - Recognized: Ean Paolo Espiritu (ID: 1)
+2025-11-11 08:30:07,508 - main - INFO - TIME-OUT MODE
+2025-11-11 08:30:10,419 - main - INFO - Recognized: Ean Paolo Espiritu (ID: 1)
+2025-11-11 08:30:15,226 - main - INFO - Recognized: Ean Paolo Espiritu (ID: 1)
+2025-11-11 08:30:18,924 - main - INFO - Recognized: Ean Paolo Espiritu (ID: 1)
+2025-11-11 08:30:20,122 - main - INFO - TIME-OUT MODE
+2025-11-11 08:30:23,674 - main - INFO - Quit key pressed
+2025-11-11 08:30:23,674 - main - INFO - Shutting down...
+2025-11-11 08:30:26,675 - utils.camera - INFO - Releasing camera...
+2025-11-11 08:30:26,985 - utils.camera - INFO - Camera released
+2025-11-11 08:30:27,006 - utils.display - INFO - Display destroyed
+2025-11-11 08:30:27,011 - config.database - INFO - MySQL closed
+2025-11-11 08:30:27,011 - main - INFO - Shutdown complete
