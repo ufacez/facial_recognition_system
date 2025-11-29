@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Optional, Dict, Any
 from config.settings import Config
 from config.database import MySQLDatabase, SQLiteDatabase
@@ -136,18 +136,25 @@ class AttendanceLogger:
                     'message': 'No time-in found for today'
                 }
             
-            # Calculate hours - FIX: Handle both string and timedelta
+            # Calculate hours - FIXED: Handle both string and timedelta
             time_in_value = record['time_in']
             
-            if isinstance(time_in_value, str):
-                # It's a string, parse it
-                time_in_dt = datetime.strptime(time_in_value, '%H:%M:%S')
-                time_in_today = datetime.combine(date.today(), time_in_dt.time())
-            else:
-                # It's a timedelta, convert to datetime
-                time_in_today = datetime.combine(date.today(), (datetime.min + time_in_value).time())
-            
-            hours_worked = (now - time_in_today).seconds / 3600
+            try:
+                if isinstance(time_in_value, str):
+                    # It's a string, parse it
+                    time_in_dt = datetime.strptime(time_in_value, '%H:%M:%S')
+                    time_in_today = datetime.combine(date.today(), time_in_dt.time())
+                elif isinstance(time_in_value, timedelta):
+                    # It's a timedelta, convert to datetime
+                    time_in_today = datetime.combine(date.today(), (datetime.min + time_in_value).time())
+                else:
+                    # It's already a time object
+                    time_in_today = datetime.combine(date.today(), time_in_value)
+                
+                hours_worked = (now - time_in_today).seconds / 3600
+            except Exception as e:
+                logger.error(f"Error calculating hours: {e}")
+                hours_worked = 0.0
             
             # Update time-out
             self.mysql_db.execute_query("""
