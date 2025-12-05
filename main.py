@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class AttendanceSystem:
-    """Main attendance system - optimized for minimal-lag confirmation"""
+    """Main attendance system - optimized for performance"""
 
     def __init__(self):
         logger.info("Initializing TrackSite Attendance System...")
@@ -66,23 +66,16 @@ class AttendanceSystem:
         self.overlay_lock = threading.Lock()
         self.overlay_end_time: Optional[float] = None
 
-        # Confirmation system - FIXED
+        # Confirmation system
         self.pending_worker: Optional[Dict[str, Any]] = None
         self.waiting_for_confirmation = False
         self.confirmation_timeout = 8.0
         self.confirmation_start_time: Optional[float] = None
-        self.last_recognized_worker_id: Optional[int] = None  # Track last recognized worker
-        self.recognition_cooldown = 3.0  # Cooldown in seconds
+        self.last_recognized_worker_id: Optional[int] = None
+        self.recognition_cooldown = 3.0
 
-        # Lightweight UI params for 640x480
+        # Lightweight UI params
         self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.font_small_scale = 0.5
-        self.font_med_scale = 0.7
-        self.font_thin = 1
-        self.font_thick = 2
-
-        # Current frame face detection (for live box drawing)
-        self.current_face_box: Optional[Tuple[int, int, int, int]] = None
 
     def initialize(self) -> bool:
         """Initialize all system components"""
@@ -134,7 +127,7 @@ class AttendanceSystem:
                 pass
             logger.info("GPIO initialized")
 
-            # Create display window (WINDOWED)
+            # Create display window
             logger.info("Initializing display...")
             self.display = Display()
             self.display.create_window(fullscreen=False)
@@ -172,10 +165,6 @@ class AttendanceSystem:
         self.sync_thread.start()
 
         try:
-            last_frame_time = time.time()
-            fps_values = []
-            current_fps = 0
-
             while self.is_running:
                 loop_start = time.time()
 
@@ -190,9 +179,6 @@ class AttendanceSystem:
                 frame = cv2.flip(frame, 1)
                 self.frame_counter += 1
 
-                # Reset current face box
-                self.current_face_box = None
-
                 # Confirmation timeout reset
                 if self.waiting_for_confirmation and self.confirmation_start_time:
                     if time.time() - self.confirmation_start_time > self.confirmation_timeout:
@@ -200,10 +186,10 @@ class AttendanceSystem:
                         self.pending_worker = None
                         self.waiting_for_confirmation = False
                         self.confirmation_start_time = None
-                        self.last_recognized_worker_id = None  # Reset cooldown
+                        self.last_recognized_worker_id = None
 
-                # Recognition (every N frames) - SIMPLE: recognize_face draws everything
-                if self.frame_counter % self.skip_frames == 0 and self.success_overlay is None:
+                # Recognition (every N frames) - ALWAYS runs, never stops
+                if self.frame_counter % self.skip_frames == 0:
                     try:
                         worker_info, frame, face_box = self.face_recognizer.recognize_face(frame)
                     except Exception:
@@ -216,16 +202,16 @@ class AttendanceSystem:
                             worker_info = None
                             face_box = None
 
-                    # Handle recognition for confirmation (first face only)
+                    # Handle recognition for confirmation
                     if worker_info and face_box and not self.waiting_for_confirmation:
                         self._handle_recognition(worker_info, face_box)
 
-                # Draw confirmation prompt if waiting
+                # Show confirmation text (no rectangle box, just overlay text)
                 if self.waiting_for_confirmation and self.pending_worker:
-                    frame = self._draw_confirmation_prompt_fast(frame, self.pending_worker)
+                    frame = self._draw_confirmation_text(frame, self.pending_worker)
 
-                # Lightweight status bar
-                status = self._get_status_text(current_fps)
+                # Optimized status bar (removed FPS)
+                status = self._get_status_text()
                 frame = self.display.add_status_bar(frame, status)
 
                 # Mode indicator
@@ -238,27 +224,17 @@ class AttendanceSystem:
                         font_scale=0.7
                     )
 
-                # Draw success banner quickly
+                # Draw success banner
                 with self.overlay_lock:
                     if self.success_overlay is not None:
                         if time.time() < (self.overlay_end_time or 0):
-                            frame = self._draw_success_banner_fast(frame, self.success_overlay)
+                            frame = self._draw_success_banner(frame, self.success_overlay)
                         else:
                             self.success_overlay = None
                             self.overlay_end_time = None
 
                 # Display frame
                 self.display.show_frame(frame)
-
-                # FPS calc
-                now_time = time.time()
-                delta = max(now_time - last_frame_time, 1e-6)
-                fps_values.append(1.0 / delta)
-                last_frame_time = now_time
-
-                if len(fps_values) >= 10:
-                    current_fps = int(sum(fps_values) / len(fps_values))
-                    fps_values = []
 
                 # Handle keyboard
                 key = self.display.wait_key(1)
@@ -290,22 +266,20 @@ class AttendanceSystem:
             self.shutdown()
 
     def _handle_recognition(self, worker_info: Dict[str, Any], face_box: Tuple[int, int, int, int]):
-        """Store recognized worker and wait for confirmation - FIXED"""
+        """Store recognized worker and wait for confirmation"""
         now = datetime.now()
         worker_id = worker_info.get('worker_id')
 
-        # COOLDOWN CHECK - prevent same worker from triggering multiple times
+        # Cooldown check
         if self.last_recognized_worker_id == worker_id:
             if self.last_recognition_time:
                 time_diff = (now - self.last_recognition_time).total_seconds()
                 if time_diff < self.recognition_cooldown:
-                    return  # Still in cooldown period
+                    return
         
-        # Store recognition time and worker
         self.last_recognition_time = now
         self.last_recognized_worker_id = worker_id
         
-        # Store worker info WITHOUT face_box (we'll draw it separately)
         self.pending_worker = worker_info.copy()
         self.waiting_for_confirmation = True
         self.confirmation_start_time = time.time()
@@ -326,14 +300,13 @@ class AttendanceSystem:
         # Process attendance
         result = self._process_attendance(self.pending_worker)
 
-        # Show result overlay with full info
+        # Show result overlay
         self._show_result_overlay(result, worker_name, worker_id, worker_code)
 
         # Reset confirmation state
         self.pending_worker = None
         self.waiting_for_confirmation = False
         self.confirmation_start_time = None
-        # Keep last_recognized_worker_id and last_recognition_time for cooldown
 
     def _cancel_confirmation(self):
         """User pressed 'X' - cancel confirmation"""
@@ -341,50 +314,52 @@ class AttendanceSystem:
         self.pending_worker = None
         self.waiting_for_confirmation = False
         self.confirmation_start_time = None
-        self.last_recognized_worker_id = None  # Reset cooldown on cancel
+        self.last_recognized_worker_id = None
 
-    # ------------------- Optimized fast drawing functions -------------------
-    def _draw_confirmation_prompt_fast(self, frame, worker_info):
-        """Draw fast confirmation UI with NAME and WORKER ID - FIXED"""
+    def _draw_confirmation_text(self, frame, worker_info):
+        """Draw simple confirmation text overlay - no rectangle box"""
         h, w = frame.shape[:2]
 
-        # Get worker info safely
         first = worker_info.get("first_name") or ""
         last = worker_info.get("last_name") or ""
         name = f"{first} {last}".strip() or "Unknown"
         worker_id = worker_info.get("worker_id", 0)
         worker_code = worker_info.get("worker_code", "N/A")
 
-        # Draw STATIC info box in center (doesn't follow face)
-        box_w = 400
-        box_h = 120
-        box_x = (w - box_w) // 2
-        box_y = (h - box_h) // 2
-
-        # Semi-transparent background
-        overlay = frame.copy()
-        cv2.rectangle(overlay, (box_x, box_y), (box_x + box_w, box_y + box_h), (0, 180, 0), -1)
-        cv2.addWeighted(overlay, 0.85, frame, 0.15, 0, frame)
-
-        # Border
-        cv2.rectangle(frame, (box_x, box_y), (box_x + box_w, box_y + box_h), (0, 255, 0), 3)
-
-        # Text inside box
-        text_x = box_x + 20
-        cv2.putText(frame, name, (text_x, box_y + 35),
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+        # Draw text at top center with shadow for readability
+        center_x = w // 2
         
-        id_text = f"ID: {worker_id} | Code: {worker_code}"
-        cv2.putText(frame, id_text, (text_x, box_y + 65),
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 220, 220), 1)
-
-        cv2.putText(frame, "Press C to CONFIRM | Press X to CANCEL", (text_x, box_y + 95),
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
+        # Line 1: Worker name
+        text1 = name
+        (text_w, text_h), _ = cv2.getTextSize(text1, cv2.FONT_HERSHEY_SIMPLEX, 1.2, 2)
+        x1 = center_x - text_w // 2
+        y1 = 80
+        
+        cv2.putText(frame, text1, (x1 + 2, y1 + 2), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 4)
+        cv2.putText(frame, text1, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
+        
+        # Line 2: ID and Code
+        text2 = f"ID: {worker_id} | Code: {worker_code}"
+        (text_w2, text_h2), _ = cv2.getTextSize(text2, cv2.FONT_HERSHEY_SIMPLEX, 0.8, 2)
+        x2 = center_x - text_w2 // 2
+        y2 = 120
+        
+        cv2.putText(frame, text2, (x2 + 2, y2 + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 3)
+        cv2.putText(frame, text2, (x2, y2), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (220, 220, 220), 2)
+        
+        # Line 3: Instructions
+        text3 = "Press C to CONFIRM | Press X to CANCEL"
+        (text_w3, text_h3), _ = cv2.getTextSize(text3, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+        x3 = center_x - text_w3 // 2
+        y3 = 160
+        
+        cv2.putText(frame, text3, (x3 + 2, y3 + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 3)
+        cv2.putText(frame, text3, (x3, y3), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
         return frame
 
-    def _draw_success_banner_fast(self, frame: np.ndarray, overlay_data: Dict[str, Any]) -> np.ndarray:
-        """Fast top banner with NAME and WORKER ID"""
+    def _draw_success_banner(self, frame: np.ndarray, overlay_data: Dict[str, Any]) -> np.ndarray:
+        """Success banner with time-in information"""
         result = overlay_data.get('result', {})
         worker_name = overlay_data.get('worker_name', '')
         worker_id = overlay_data.get('worker_id', 0)
@@ -396,12 +371,14 @@ class AttendanceSystem:
 
         if result.get('success'):
             color = (10, 110, 10)
-            title = "✓ RECORDED"
+            title = "RECORDED"
             detail = f"{worker_name} (ID: {worker_id})"
-            detail2 = f"Code: {worker_code} | {timestamp.strftime('%I:%M %p')}"
+            # Format: "Code: XXX | Time In: 02:30 PM"
+            time_str = timestamp.strftime('%I:%M %p')
+            detail2 = f"Code: {worker_code} | Time In: {time_str}"
         else:
             color = (120, 30, 30)
-            title = "⚠ ALREADY IN"
+            title = "ALREADY IN"
             detail = result.get('message', '')
             detail2 = ""
 
@@ -415,9 +392,8 @@ class AttendanceSystem:
 
         return frame
 
-    # -------------------------------------------------------------------------
     def _process_attendance(self, worker_info: Dict[str, Any]) -> Dict[str, Any]:
-        """Process attendance (synchronous, fast)"""
+        """Process attendance"""
         worker_id = worker_info['worker_id']
 
         if self.timeout_mode:
@@ -435,7 +411,7 @@ class AttendanceSystem:
 
     def _show_result_overlay(self, result: Dict[str, Any], worker_name: str, 
                             worker_id: int, worker_code: str):
-        """Set success overlay data with full worker info"""
+        """Set success overlay data"""
         current_time = datetime.now()
 
         overlay_data = {
@@ -474,16 +450,22 @@ class AttendanceSystem:
         except Exception as e:
             logger.warning(f"Reload failed: {e}")
 
-    def _get_status_text(self, fps: int = 0) -> str:
-        """Get compact status text"""
+    def _get_status_text(self) -> str:
+        """Get optimized status text - removed FPS, added time and full date"""
         parts = []
+        
+        # Online/Offline status
         parts.append("[ONLINE]" if (self.mysql_db and getattr(self.mysql_db, 'is_connected', False)) else "[OFFLINE]")
-        parts.append("TO" if self.timeout_mode else "TI")
-        parts.append(f"{fps}FPS")
-
+        
+        # Mode (Full text instead of abbreviation)
+        parts.append("TIME OUT" if self.timeout_mode else "TIME IN")
+        
+        # Current time in 12-hour format
         now = datetime.now()
-        parts.append(now.strftime('%H:%M:%S'))
-        parts.append(now.strftime('%b %d %y'))
+        parts.append(now.strftime('%I:%M:%S %p'))
+        
+        # Full date format (e.g., "November 30, 2025")
+        parts.append(now.strftime('%B %d, %Y'))
 
         return " | ".join(parts)
 
